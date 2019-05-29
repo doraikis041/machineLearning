@@ -1,0 +1,249 @@
+---
+title: "Tarea 3 - ML"
+author: "Doris Medina 241578 y Leticia Suarez 202006"
+date: "13 de mayo de 2019"
+output: html_document
+---
+
+El objetivo de esta tarea es construir modelos predictivos de clasificación usando Naïve Bayes y Regresión Logística. Para esto se utilizará el dataset definido en el archivo data.csv extraido de https://archive.ics.uci.edu/ml/datasets/banknote+authentication .
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
+```
+
+Cargando librerías
+```{r Libreria, warning=FALSE}
+library(e1071)
+library(class)
+set.seed(123)
+```
+
+Cargando los datos
+```{r  Carga de datos}
+T0 <- read.csv(file = "data.csv")
+```
+
+### 1. Realizar un plot del espacio de atributos variance ~ skewness coloreando los puntos de rojo si la clase (atributo class) es 0 y de azul si la clase es 1, utilizando pch = 1 (default)
+```{r plot dataset}
+
+h.col <- function(y) ifelse(y == 0, "red", "blue")
+
+plot(variance ~ skewness, T0 , col = h.col(T0$class), 
+     main = "Plot del dataset data.csv -> T0")
+ 
+```
+
+
+### 2. Separar el dataset en train y test, utilizando 1090 elementos para train y el resto para test.
+```{r Definiendo test y train}
+df <- T0
+ntrain <- 1090
+idx <- sample.int(nrow(df),ntrain)
+train <- df[idx,]
+test <- df[-idx,]
+
+#train$
+head(train)
+head(test)
+
+```
+
+### 3. Calcular las hipótesis y los errores respectivos en test del algoritmo Naïve Bayes en los espacios de variables predictoras definidos por los pares de atributos: variance + skewness, variance + curtosis, etc.
+```{r Naïve Bayes error}
+# Calculo fit para cada combinación de variables
+h.fit1 <- naiveBayes(as.factor(class) ~ variance + skewness, data = train)
+h.fit2 <- naiveBayes(as.factor(class) ~ variance + curtosis, data = train)
+h.fit3 <- naiveBayes(as.factor(class) ~ variance + entropy, data = train)
+h.fit4 <- naiveBayes(as.factor(class) ~ skewness + curtosis, data = train)
+h.fit5 <- naiveBayes(as.factor(class) ~ skewness + entropy, data = train)
+h.fit6 <- naiveBayes(as.factor(class) ~ entropy + curtosis, data = train)
+
+# Calculo la predicción
+test$yhat_fit1 <- predict(h.fit1, newdata = test, type = 'class')
+test$yhat_fit2 <- predict(h.fit2, newdata = test, type = 'class')
+test$yhat_fit3 <- predict(h.fit3, newdata = test, type = 'class')
+test$yhat_fit4 <- predict(h.fit4, newdata = test, type = 'class')
+test$yhat_fit5 <- predict(h.fit5, newdata = test, type = 'class')
+test$yhat_fit6 <- predict(h.fit6, newdata = test, type = 'class')
+
+#Defino nombre de combinaciones
+h.var_formulas <- c("H1::variance + skewness","H2::variance + curtosis","H3::variance + entropy","H4::skewness + curtosis","H5::skewness + entropy","H6::entropy + curtosis")
+
+#Defino función del calculo del error
+fn_error <- function(yhat, y){mean(ifelse(yhat == y, 0, 1))}
+
+
+#Defino un vector con todos los errores
+h.error_Nbayes <- c(fn_error(test$yhat_fit1,test$class),
+                    fn_error(test$yhat_fit2,test$class),
+                    fn_error(test$yhat_fit3,test$class),
+                    fn_error(test$yhat_fit4,test$class),
+                    fn_error(test$yhat_fit5,test$class),
+                    fn_error(test$yhat_fit6,test$class))
+
+#Asigno nombre a cada error segun combinación de variables
+names(h.error_Nbayes) <- h.var_formulas
+
+#Obtengo los 2 resueltados que minimizan el error
+h.MaxHipo <- sort(h.error_Nbayes)[c(1,2)]
+print(h.MaxHipo)
+```
+### 4. Realizar 5-fold cross validation con las dos mejores hipótesis. Seleccionar la mejor hipótesis y justificar.
+
+En el caso de Naive Bayes la hipótesis está formada por un conjunto de hipótesis ya que el modelo se basa en el análisis independiente de cada una de las variables, dado la clase que se quiere clasificar.
+Para este ejercicio, y utilizando este modelo la hipótesis que mejor explica o generaliza la clase es la que está construida con el conjunto de hipótesis que considera la Varianza y la oblicuidad (H1::variance + skewnes), ya que la evidencia indica ser la hipótesis con menor error en test y simultáneamente la que tiene menor error en cross validation, convalidando la conclusión.
+```{r Naïve Bayes 5-fold cross validation}
+h.cv_folds <- split(train, seq(1,5))
+h.cv_err_logit <- rep(0, 2)
+h.cv_test <- list()
+h.cv_train <- list()
+
+#Para hacer la validación cruzada hay que entrenar con cv_train[[k]] (que contiene todos los datos de train menos los que están en cv_test[[k]]) y hacer predict con cv_test[[k]].
+
+for (k in seq(1, 5)) 
+{
+  h.cv_test[[k]] <- h.cv_folds[[k]]
+  h.cv_train[[k]] <- data.frame()
+  
+  for (i in seq(1, 5)) {
+    if (i != k) h.cv_train[[k]] <- rbind(h.cv_train[[k]], h.cv_folds[[i]])
+  }
+}
+
+
+# as.vector(h.error_trainh1) 
+# h.error_trainh3
+# h.error_testH1
+# h.error_testH2
+
+error_trainH1 <- vector(length = 5)
+error_trainH2 <- vector(length = 5)
+
+
+for (k in seq(1, 5)) 
+{
+  # Hipotesis 1 -> H1::variance + skewness
+  h.fit1K5 <- naiveBayes(as.factor(class) ~ variance + skewness, data = h.cv_train[[k]] )
+  h.cv_test[[k]]$yhat_fit1K5 <- predict(h.fit1K5, newdata = h.cv_test[[k]], type = 'class')
+  error_trainH1[k] <- c(fn_error(h.cv_test[[k]]$yhat_fit1K5,h.cv_test[[k]]$class))
+  
+  #Hipotesis 2 -> H3::variance + entropy
+  h.fit3K5 <- naiveBayes(as.factor(class) ~ variance + entropy, data = h.cv_train[[k]] )
+  h.cv_test[[k]]$yhat_fit3K5 <- predict(h.fit3K5, newdata = h.cv_test[[k]], type = 'class')
+  error_trainH2[k] <- c(fn_error(h.cv_test[[k]]$yhat_fit3K5,h.cv_test[[k]]$class))
+}
+
+print(mean(error_trainH1))
+print(mean(error_trainH2))
+
+# La mejor hipotesis es error_trainH1 -> variance + skewness porque tienen menor error (0.1321101) utilizando cross validation
+```
+
+### 5.Plotear el resultado de la mejor hipótesis identificando los errores de predicción con puntos sólidos (pch = 19).
+```{r plot Naïve Bayes}
+h.pch <- function(yhat,y) ifelse(yhat== y,1,19)
+h.col <- function(y) ifelse(y == 0, "red", "blue")
+
+plot(variance ~ skewness, test,
+     col = h.col(test$yhat_fit1), # se usa el color de la prediccion
+     pch = h.pch(test$yhat_fit1, test$class), 
+     main = "Plot de Cross validation con Hipotesis variance ~ skewness")  # plot de los puntos de T0
+```
+
+### 6. Calcular las hipótesis y los errores respectivos en test de la regresión logistica en los espacios de variables predictoras definidos por los pares de atributos: variance + skewness, variance + curtosis, etc.
+```{r regresión logistica error}
+### Aplicar RL a todo el dataset T0
+h.fit_rl1 <- glm(class ~ variance + skewness, data = train, family = binomial)
+h.fit_rl2 <- glm(class ~ variance + curtosis, data = train, family = binomial)
+h.fit_rl3 <- glm(class ~ variance + entropy, data = train, family = binomial)
+h.fit_rl4 <- glm(class ~ skewness + curtosis, data = train, family = binomial)
+h.fit_rl5 <- glm(class ~ skewness + entropy, data = train, family = binomial)
+h.fit_rl6 <- glm(class ~ entropy + curtosis, data = train, family = binomial)
+
+
+### Calcular la prediccion en T0 y agregar al dataset
+test$prob_rl1 <- predict(h.fit_rl1, newdata = test, type = 'response') # devuelve P[Y=1|X]
+test$prob_rl2 <- predict(h.fit_rl2, newdata = test, type = 'response') # devuelve P[Y=1|X]
+test$prob_rl3 <- predict(h.fit_rl3, newdata = test, type = 'response') # devuelve P[Y=1|X]
+test$prob_rl4 <- predict(h.fit_rl4, newdata = test, type = 'response') # devuelve P[Y=1|X]
+test$prob_rl5 <- predict(h.fit_rl5, newdata = test, type = 'response') # devuelve P[Y=1|X]
+test$prob_rl6 <- predict(h.fit_rl6, newdata = test, type = 'response') # devuelve P[Y=1|X]
+
+
+test$yhat_rlH1 <- ifelse(test$prob_rl1 > 0.5, 1, 0) # la prediccion es 1 si P[Y=1|X] > 0.5
+test$yhat_rlH2 <- ifelse(test$prob_rl2 > 0.5, 1, 0) # la prediccion es 1 si P[Y=1|X] > 0.5
+test$yhat_rlH3 <- ifelse(test$prob_rl3 > 0.5, 1, 0) # la prediccion es 1 si P[Y=1|X] > 0.5
+test$yhat_rlH4 <- ifelse(test$prob_rl4 > 0.5, 1, 0) # la prediccion es 1 si P[Y=1|X] > 0.5
+test$yhat_rlH5 <- ifelse(test$prob_rl5 > 0.5, 1, 0) # la prediccion es 1 si P[Y=1|X] > 0.5
+test$yhat_rlH6 <- ifelse(test$prob_rl6 > 0.5, 1, 0) # la prediccion es 1 si P[Y=1|X] > 0.5
+
+#Defino un vector con todos los errores
+h.error_rl <- c(fn_error(test$yhat_rlH1,test$class),
+                    fn_error(test$yhat_rlH2,test$class),
+                    fn_error(test$yhat_rlH3,test$class),
+                    fn_error(test$yhat_rlH4,test$class),
+                    fn_error(test$yhat_rlH5,test$class),
+                    fn_error(test$yhat_rlH6,test$class))
+
+#Asigno nombre a cada error segun combinación de variables
+names(h.error_rl) <- h.var_formulas
+
+h.MaxHipoRL <- sort(h.error_rl)[c(1,2)]
+print(h.MaxHipoRL)
+```
+
+### 7. Realizar 5-fold cross validation con las dos mejores hipótesis de la regresión logistica. Seleccionar la mejor hipótesis y justificar
+
+Para el caso de Regresión logística también la hipótesis que mejor explica la clase es la que considera la varianza y la oblicuidad (H1::variance + skewnes) por tener menor error en test y un error de cross validation que convalida esta conclusión. 
+```{r regresión logistica 5-fold cross validation}
+error_trainH1_rl <- vector(length = 5)
+error_trainH2_rl <- vector(length = 5)
+
+for (k in seq(1, 5))
+{
+  # Hipotesis 1
+  h.fit1RL <- glm(class ~ variance + skewness, data = h.cv_train[[k]], family = binomial)
+  h.cv_test[[k]]$prob_rl1 <- predict(h.fit1RL, newdata = h.cv_test[[k]], type = 'response')
+  h.cv_test[[k]]$yhat_rlH1 <- ifelse(h.cv_test[[k]]$prob_rl1 > 0.5, 1, 0)
+  error_trainH1_rl[k] <- fn_error(h.cv_test[[k]]$yhat_rlH1,h.cv_test[[k]]$class)
+
+  #Hipotesis 2
+  h.fit2RL <- glm(class ~ variance + curtosis, data = h.cv_train[[k]], family = binomial)
+  h.cv_test[[k]]$prob_rl2 <- predict(h.fit2RL, newdata = h.cv_test[[k]], type = 'response')
+  h.cv_test[[k]]$yhat_rlH2 <- ifelse(h.cv_test[[k]]$prob_rl2 > 0.5, 1, 0)
+  error_trainH2_rl[k] <- fn_error(h.cv_test[[k]]$yhat_rlH2,h.cv_test[[k]]$class)
+}
+
+print(mean(error_trainH1_rl))
+print(mean(error_trainH2_rl))
+```
+
+
+### 8. Plotear el resultado de la mejor hipótesis identificando los errores de predicción con puntos sólidos (pch = 19)
+```{r Plot regresión logistica}
+### Prediccion en la grilla (solo para visualizacion)
+h.pch <- function(yhat,y) ifelse(yhat== y,1,19)
+h.col <- function(y) ifelse(y == 0, "red", "blue")
+plot(variance ~ skewness, test,
+     col = h.col(test$yhat_rlH1), # se usa el color de la prediccion
+     pch = h.pch(test$yhat_rlH1, test$class), 
+     main = "Plot de Regresión logistica con Hipotesis variance ~ skewness")  # plot de los puntos de 
+```
+
+
+###Ejercicio 9
+De los dos modelos, el que nos devuelve un menor error tanto en test como en cross validation es el de Regresión Logística.
+
+Adicionalmente analizando la matriz de confusión constatamos que hay equilibrio en los falsos positivos y falsos negativos en ambos modelos.
+```{r}
+#Confusion Matrix
+matriz_conf_NBH1 <- table(test$yhat_fit1, test$class, dnn = c('pred', 'real'))
+print(matriz_conf_NBH1)
+
+matriz_conf_RLH1 <- table(test$yhat_rlH1, test$class, dnn = c('pred', 'real'))
+print(matriz_conf_RLH1)
+
+```
+
+
