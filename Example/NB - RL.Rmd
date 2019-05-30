@@ -7,6 +7,8 @@ output: html_document
 
 El objetivo de esta tarea es construir modelos predictivos de clasificación usando Naïve Bayes y Regresión Logística. Para esto se utilizará el dataset definido en el archivo data.csv extraido de https://archive.ics.uci.edu/ml/datasets/banknote+authentication .
 
+Agrego un comentario
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(root.dir = rprojroot::find_rstudio_root_file())
