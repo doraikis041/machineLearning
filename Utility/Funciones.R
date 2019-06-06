@@ -35,6 +35,15 @@ glm_fit_formulas <- function(train, formulas) {
   return(list_fit)
 }
 
+# Naive Bayes para una lista de formulas
+naiveBayes_fit_formulas <- function(train, formulas) {
+  list_fit <- list()
+  for (i in seq(1, length(formulas))) {
+    list_fit[[i]] <- naiveBayes(as.formula(formulas[i]), data = train)
+  }
+  return(list_fit)
+}
+
 # Prediccion y error MSE
 glm_pred_err <- function(list_fit, newdata, y) {
   test_pred <- list()
