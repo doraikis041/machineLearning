@@ -1,4 +1,3 @@
-
 source("Utility/head.R")
 source("Utility/funciones.R")
 
@@ -12,11 +11,6 @@ h.data <- loadData()
 h.part <- partition_train_test(h.data, ntrain = nTrain)
 h.train <- h.part$train
 h.test <- h.part$test
-
-#formulas
-h.formula <- c('as.factor(Churn) ~ ThreewayCalls',
-               'as.factor(Churn) ~ CreditRating',
-               'as.factor(Churn) ~ Occupation + MaritalStatus')
 
 #Entrenamiento del algoritmo
 h.fits <- naiveBayes_fit_formulas(train = h.train, formulas = h.formula)
