@@ -1,19 +1,30 @@
-#Definción de funciones utilizadas
+#Defincion de funciones utilizadas en los direfentes algoritmos
 
-
-# Error de clasificación
+###########################################################
+########### Error de clasificacion  #######################
+###########################################################
 fn_err_cla <- function(yhat, y) { mean(yhat != y) }
 
-# Error de regresion MSE
+
+###########################################################
+########### Error de regresion MSE  #######################
+###########################################################
 fn_err_mse <- function(yhat, y) { mean((yhat - y)^2) }
 
-# Particion train-test
+
+
+###########################################################
+###########  Particion train-test   #######################
+###########################################################
 partition_train_test <- function(df, ntrain = 10) {
   train_idx <- sample.int(nrow(df), size = ntrain)
   list(train = df[train_idx,], test = df[-train_idx,])
 }
 
-# Particion en 5 folds
+
+###########################################################
+###########   Particion en 5 folds  #######################
+###########################################################
 partition_cv <- function(df, k_folds = 5) {
   cv_test <- split(df, seq(1, h.k_folds))
   cv_train <- list()
@@ -26,7 +37,9 @@ partition_cv <- function(df, k_folds = 5) {
   list(train = cv_train, test = cv_test, k_folds = k_folds)
 }
 
-# Regresion con glm para una lista de formulas
+###########################################################
+## Regresion con glm para una lista de formulas  ##########
+###########################################################
 glm_fit_formulas <- function(train, formulas) {
   list_fit <- list()
   for (i in seq(1, length(formulas))) {
@@ -35,7 +48,10 @@ glm_fit_formulas <- function(train, formulas) {
   return(list_fit)
 }
 
-# Naive Bayes para una lista de formulas
+
+###########################################################
+######## Naive Bayes para una lista de formulas  ##########
+###########################################################
 naiveBayes_fit_formulas <- function(train, formulas) {
   list_fit <- list()
   for (i in seq(1, length(formulas))) {
@@ -43,6 +59,19 @@ naiveBayes_fit_formulas <- function(train, formulas) {
   }
   return(list_fit)
 }
+
+
+###########################################################
+########       Knn       #######################3##########
+###########################################################
+# knn_fit_formulas <- function(train,test, formulas) {
+#   list_fit <- list()
+#   for (i in seq(1, length(formulas))) {
+#     list_fit[[i]] <- knn(data = train,test = test, cl = train$y, as.formula(formulas[i]), )
+#   }
+#   return(list_fit)
+# }
+# #h.A <- function(k, train, test) {knn(train, test, cl = train$y, k)}
 
 # Prediccion y error MSE
 glm_pred_err <- function(list_fit, newdata, y) {
