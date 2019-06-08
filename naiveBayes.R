@@ -8,42 +8,25 @@ h.gridDF <- dfGridMetada()
 #Se carga los datos con las ETL generales
 h.data <- loadData()
 
-#Generar la partición de test & train
+#Generar la particion de test & train
 h.part <- partition_train_test(h.data, ntrain = nTrain)
 h.train <- h.part$train
 h.test <- h.part$test
 
-#formulas (Revisar si mantener...) ojooooooooo
-#h.formula <- c('as.factor(y) ~ x1')
+#formulas
+h.formula <- c('as.factor(Churn) ~ ThreewayCalls',
+               'as.factor(Churn) ~ CreditRating',
+               'as.factor(Churn) ~ Occupation + MaritalStatus')
 
-h.fit <- naiveBayes(as.factor(Churn) ~ ., data = h.train)
+#Entrenamiento del algoritmo
+h.fits <- naiveBayes_fit_formulas(train = h.train, formulas = h.formula)
 
-h.test$yhat <- predict(h.fit, newdata = h.test, type = 'class')
-
-
-### Plot de la prediccion sobre el dataset T0
-plot(x2 ~ x1, h.T0, xlim = c(h.min, h.max), col = h.col(yhat), 
-     main = "Plot de la prediccion de NaiveBayes para T0")  # plot de los puntos de T0
-lines(h.grid, h.f(h.grid), col = 'black', lwd = 2)    # funcion f
-
-print(bayes_error(h.f, h.T0))
-print(fn_err(h.T0$yhat, h.T0$y))
-
-#Mostrar donde estan los errores con puntos cyan
-plot(x2 ~ x1, h.T0, xlim = c(h.min, h.max),col = h.col(yhat),
-     main = "Plot de la prediccion de NaiveBayes para T0")  # plot de los puntos de T0
-lines(h.grid, h.f(h.grid), col = 'black', lwd = 2)    # funcion f
-
-#Mostrar donde estan los errores con puntos cyan
-h.new_color <- function(yhat,y) ifelse(yhat== y, 'black', 'cyan')
-plot(x2 ~ x1, h.T0, xlim = c(h.min, h.max), col = h.new_color(yhat,y), 
-     main = "Plot de la prediccion de NaiveBayes para T0")  # plot de los puntos de T0
-lines(h.grid, h.f(h.grid), col = 'black', lwd = 2)    # funcion f
+#Error de Prediccion del algoritmo
+h.error_predit <- nbayes_pred_err(list_fit = h.fits, newdata = h.test, 'Churn')
 
 
-#Mostrar donde estan los errores con puntos cyan
-h.pch <- function(yhat,y) ifelse(yhat== y,1,19) # Utilizar la funcion points para ver los tipos de puntos
-plot(x2 ~ x1, h.T0, xlim = c(h.min, h.max), 
-     col = h.new_color(yhat,y), pch = h.pch(yhat,y),
-     main = "Plot de la prediccion de NaiveBayes para T0")  # plot de los puntos de T0
-lines(h.grid, h.f(h.grid), col = 'black', lwd = 2)    # funcion f
+#Cross Validation Naive Bayes
+h.cv_part <- partition_cv(df = h.train)
+h.cv <- cv_err_nBayes(cv_part = h.cv_part, formulas = h.formula,'Churn')
+names(h.cv) <- h.formula
+print(sort(h.cv))
