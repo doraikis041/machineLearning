@@ -24,6 +24,7 @@ loadData <- function()
   T0 <- read.csv(file = "Dataset/dataset.csv")
   T0$CustomerID <- NULL
   T0$ServiceArea <- NULL
+  T0$Churn <- ifelse(T0$Churn == 'Yes',1,0)
   df <- na.omit(T0)
 }
 
@@ -31,5 +32,9 @@ loadData <- function()
 h.formula <- c('as.factor(Churn) ~ ThreewayCalls',
                'as.factor(Churn) ~ CreditRating',
                'as.factor(Churn) ~ Occupation + MaritalStatus')
+
+h.formulaOther <- c('Churn ~ ThreewayCalls',
+                  'Churn ~ CreditRating',
+                  'Churn ~ Occupation + MaritalStatus')
 
 print("Cargado todas las librerias y transformaciones inciales")
