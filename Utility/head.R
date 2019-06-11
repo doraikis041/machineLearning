@@ -13,7 +13,6 @@ set.seed(117)
 
 #Variables Generales
 nTrain <- 37445
-k <- 5
 
 ### Grilla para visualizacion
 dfGridMetada <- function(min = 0, max = 5, by = 0.1){grid_df <- data.frame(x = seq(min, max, by))}
