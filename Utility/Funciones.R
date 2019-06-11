@@ -7,9 +7,16 @@ fn_err_cla <- function(yhat, y) { mean(yhat != y) }
 
 
 ###########################################################
-###########  Particion train-test   #######################
+###########  Particion train-test_Numeric and other #######
 ###########################################################
 partition_train_test <- function(df, ntrain = 10) {
+  train_idx <- sample.int(nrow(df), size = ntrain)
+  list(train = df[train_idx,], test = df[-train_idx,])
+}
+
+partition_train_test_numeric <- function(df, ntrain = 10) {
+  df_numeric <- which(sapply(df,is.numeric))
+  df <- df[,df_numeric]
   train_idx <- sample.int(nrow(df), size = ntrain)
   list(train = df[train_idx,], test = df[-train_idx,])
 }
