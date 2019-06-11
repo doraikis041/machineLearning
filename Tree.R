@@ -18,23 +18,23 @@ h.cv_part <- partition_cv(df = h.train,k_folds = 5 )
 
 # Formula
 
-h.formulaOther <- c('Churn ~ ThreewayCalls'
-                    ,'Churn ~ CreditRating'
-                    ,'Churn ~ Occupation + MaritalStatus'
-                    ,'Churn ~ CreditRating + ThreewayCalls'
-                    ,'Churn ~ .'
-                    ,'Churn ~ Occupation + MaritalStatus + CreditRating')
+h.formulaOther <- c('as.factor(Churn) ~ ThreewayCalls'
+                   # ,'as.factor(Churn) ~ CreditRating'
+                    #,'as.factor(Churn) ~ Occupation + MaritalStatus'
+                    #,'as.factor(Churn) ~ CreditRating + ThreewayCalls'
+                   #,'as.factor(Churn) ~ Occupation + MaritalStatus + CreditRating'
+                    ,'as.factor(Churn) ~ .' )
 h.formula <- h.formulaOther
 
-# cp
-h.ctrl <- list(ctrl1 = rpart.control(minsplit = 1, maxdepth = 5, cp = 0.00001)
-  ,ctrl2 = rpart.control(minsplit = 1, maxdepth = 10, cp = 0.0001)
-  ,ctrl3 = rpart.control(minsplit = 1, maxdepth = 20, cp = 0.001)
-  ,ctrl4 = rpart.control(minsplit = 1, maxdepth = 25, cp = 0.001)
-  ,ctrl4 = rpart.control(minsplit = 1, maxdepth = 30, cp = 0.01)
+# cp mientras mas chico es cp mas complejo es
+h.ctrl <- list(ctrl1 = rpart.control(minsplit = 1, maxdepth = 30, cp = 0.00001)
+  #,ctrl2 = rpart.control(minsplit = 1, maxdepth = 30, cp = 0.0001)
+  #,ctrl3 = rpart.control(minsplit = 1, maxdepth = 30, cp = 0.001)
+ # ,ctrl4 = rpart.control(minsplit = 1, maxdepth = 30, cp = 0.01)
 )
-parms = list(split = "information")
- 
+parms = list(split = "gini")
+#a <-rpart(as.factor(Churn)~.,data = h.train,control = h.ctrl[[1]],parms = parms )
+
 # Clasificacion con rpart
 h.tree_fit <- rpart_fit_ctrl(h.train, h.formula, h.ctrl, method = 'class', parms)
 
@@ -42,22 +42,20 @@ h.tree_fit <- rpart_fit_ctrl(h.train, h.formula, h.ctrl, method = 'class', parms
 rpart_plot_fit(h.tree_fit)
 
 
-# error en test
+# Error en test
 h.rpart_test_pred_err <- rpart_pred_err(h.tree_fit, newdata = h.test, y = 'Churn')
 h.rpart_test_pred <- h.rpart_test_pred_err$pred
 h.rpart_test_err <- h.rpart_test_pred_err$err
 
-# error en train
+# Error en train
 h.rpart_train_pred_err <- rpart_pred_err(h.tree_fit, newdata = h.train, y = 'Churn')
 h.rpart_train_pred <- h.rpart_train_pred_err$pred
 h.rpart_train_err <- h.rpart_train_pred_err$err
 
-# CV error
-
+# Cross Validation Error
 h.rpart_cv_err <- rpart_cv_err(h.cv_part, h.formula, h.ctrl, 'Churn')
 
-# Plot
-
+# Plot error
 plot(h.rpart_test_err, type = 'l', col = 'red', ylim = c(0., 0.3),
      main = 'Error de prediccion Rpart',
      ylab = 'Error de clasificacion',
@@ -65,8 +63,10 @@ plot(h.rpart_test_err, type = 'l', col = 'red', ylim = c(0., 0.3),
 lines(h.rpart_train_err, col = 'blue')
 lines(h.rpart_cv_err, col = 'magenta')
 axis(1, at = seq(1, length(h.ctrl)))
-#legend("topright", legend = c('train', 'test', 'cv'),
-#       col = c('blue', 'red', 'magenta'), lty = c(1, 1, 1))
+legend("topright", legend = c('train', 'test', 'cv'),
+       col = c('blue', 'red', 'magenta'), lty = c(1, 1, 1))
+
+
 
 
 
