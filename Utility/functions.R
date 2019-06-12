@@ -98,7 +98,6 @@ glm_pred_err_cla <- function(list_fit, newdata, y, umbral =0.5) {
 
 
 # Prediccion y matriz de confusión  
-
 glm_pred_err_mc <- function(list_fit, newdata, y) {
   test_prob <- list()
   test_pred <- list()
