@@ -1,5 +1,4 @@
-source("Utility/head.R")
-source("Utility/funciones.R")
+source("Utility/functions.R")
 
 #Genero la grilla de visualización
 h.gridDF <- dfGridMetada()
@@ -16,21 +15,12 @@ h.test <- h.part$test
 # Particion para cross validation con k_folds = 5
 h.cv_part <- partition_cv(df = h.train,k_folds = 5 )
 
-# Formula
-
-h.formulaOther <- c('as.factor(Churn) ~ ThreewayCalls'
-                   # ,'as.factor(Churn) ~ CreditRating'
-                    #,'as.factor(Churn) ~ Occupation + MaritalStatus'
-                    #,'as.factor(Churn) ~ CreditRating + ThreewayCalls'
-                   #,'as.factor(Churn) ~ Occupation + MaritalStatus + CreditRating'
-                    ,'as.factor(Churn) ~ .' )
-h.formula <- h.formulaOther
+# Formulas
+h.formula <- c('as.factor(Churn) ~ .' )
 
 # cp mientras mas chico es cp mas complejo es
-h.ctrl <- list(ctrl1 = rpart.control(minsplit = 1, maxdepth = 30, cp = 0.00001)
-  #,ctrl2 = rpart.control(minsplit = 1, maxdepth = 30, cp = 0.0001)
-  #,ctrl3 = rpart.control(minsplit = 1, maxdepth = 30, cp = 0.001)
- # ,ctrl4 = rpart.control(minsplit = 1, maxdepth = 30, cp = 0.01)
+h.ctrl <- list(ctrl1 = rpart.control(minsplit = 1, maxdepth = 4, cp = 0.0001)
+  ,ctrl2 = rpart.control(minsplit = 1, maxdepth = 4, cp = 0.01)
 )
 parms = list(split = "gini")
 #a <-rpart(as.factor(Churn)~.,data = h.train,control = h.ctrl[[1]],parms = parms )
@@ -53,22 +43,40 @@ h.rpart_train_pred <- h.rpart_train_pred_err$pred
 h.rpart_train_err <- h.rpart_train_pred_err$err
 
 # Cross Validation Error
-h.rpart_cv_err <- rpart_cv_err(h.cv_part, h.formula, h.ctrl, 'Churn')
+# Prediccion y error de cv con rpart
+rpart_cv_err <- function(cv_part, formula, ctrl, y) {
+  cv_test <- cv_part$test
+  cv_train <- cv_part$train
+  #cv_matrix_err <- matrix(0, nrow = cv_part$k_folds, ncol = length(ctrl))
+  listaerr <- list()
+  for (k in seq(1, cv_part$k_folds)) {
+    list_fit <- rpart_fit_ctrl(cv_train[[k]], 
+                               formula = formula, ctrl = ctrl)
+    list_pred_err <- rpart_pred_err(list_fit, newdata = cv_test[[k]], y = y)
+    listaerr[[k]]<- list_pred_err$err
+    
+  }
+  salida <- lapply(listaerr,mean)
+  return(salida)
+}
 
-# Plot error
-plot(h.rpart_test_err, type = 'l', col = 'red', ylim = c(0., 0.3),
-     main = 'Error de prediccion Rpart',
-     ylab = 'Error de clasificacion',
-     xlab = 'Hipotesis', xaxt = 'n')
-lines(h.rpart_train_err, col = 'blue')
-lines(h.rpart_cv_err, col = 'magenta')
-axis(1, at = seq(1, length(h.ctrl)))
-legend("topright", legend = c('train', 'test', 'cv'),
-       col = c('blue', 'red', 'magenta'), lty = c(1, 1, 1))
 
+#h.rpart_cv_err <- rpart_cv_err(h.cv_part, h.formula, h.ctrl, y = 'Churn')
 
-
-
-
-### REVISAR EL ERROR QUE ME DA EL MISMO PARA TODAS LAS HIPOTESIS
-
+# # Plot error
+# plot(h.rpart_test_err, type = 'l', col = 'red', ylim = c(0., 0.3),
+#      main = 'Error de prediccion Rpart',
+#      ylab = 'Error de clasificacion',
+#      xlab = 'Hipotesis', xaxt = 'n')
+# lines(h.rpart_train_err, col = 'blue')
+# lines(h.rpart_cv_err, col = 'magenta')
+# axis(1, at = seq(1, length(h.ctrl)))
+# legend("topright", legend = c('train', 'test', 'cv'),
+#        col = c('blue', 'red', 'magenta'), lty = c(1, 1, 1))
+# 
+# 
+# 
+# 
+# 
+# ### REVISAR EL ERROR QUE ME DA EL MISMO PARA TODAS LAS HIPOTESIS
+# 
