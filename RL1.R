@@ -16,7 +16,6 @@ h.formulas <- c("as.factor(Churn) ~ .")
 
 
 # Entreno, predigo y calculo error 
-
 h.glm_fit <- glm_fit_formulas_cla (h.train, h.formulas)
 h.glm_pred_err_cla <- glm_pred_err_cla(h.glm_fit, newdata = h.test, y = "Churn") 
 h.glm_pred_err_mc <- glm_pred_err_mc (h.glm_fit, newdata = h.test, y = "Churn") 

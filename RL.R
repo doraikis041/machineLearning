@@ -1,11 +1,13 @@
-library(e1071)
-library(class)
-library(dplyr)
-set.seed(113)
+
+
+source("Utility/head.R")
+source("Utility/funciones.R")
+
 
 # Cargar datos
 
-raw_data <- read.csv(file = "dataset.csv")
+raw_data <- loadData()
+
 
 df <- raw_data
 
