@@ -7,6 +7,11 @@ h.gridDF <- dfGridMetada()
 #Se carga los datos con las ETL generales
 h.data <- loadData()
 
+#definición de las formulas a utilizar
+h.formula <- c('as.factor(Churn) ~ ThreewayCalls',
+               'as.factor(Churn) ~ CreditRating',
+               'as.factor(Churn) ~ Occupation + MaritalStatus')
+
 #Generar la particion de test & train
 h.part <- partition_train_test(h.data, ntrain = nTrain)
 h.train <- h.part$train
