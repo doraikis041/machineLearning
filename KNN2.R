@@ -35,6 +35,7 @@ list(err = test_err, k = k)
 }
 
 h.error_knn <- knn_pred_err_cla(list_pred = h.t_predTest, newdata = h.test, y = 'Churn', k= h.k)
+print(h.error_knn)
 
 
 # error CV 
@@ -56,7 +57,7 @@ cv_err_knn <- function(cv_part, y, k) {
 h.CV_err <- cv_err_knn(cv_part = h.cv, y = h.cv_con_Churn, k= h.k) 
 
 
-list_pred_err <- h.A(k = h.k, train = h.cv$train[[1]], test = h.cv$test[[1]], y= h.cv_con_Churn$train[[1]]$Churn)
+# list_pred_err <- h.A(k = h.k, train = h.cv$train[[1]], test = h.cv$test[[1]], y= h.cv_con_Churn$train[[1]]$Churn)
 
 # for (s in seq(1,h.kfolds)  { 
 #CV_pred[[s]] <- knn(CV_Train[[s]], CV_test[[s]]....)
