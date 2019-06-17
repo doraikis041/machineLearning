@@ -8,6 +8,8 @@ library(rpart.plot)
 library(dplyr)
 #RandomForest
 library(randomForest)
+#Boosting
+library(gbm)
 
 #Definiendo el valor de see para los datos aleatorios generados
 set.seed(117)
@@ -178,8 +180,6 @@ cv_err_nBayes <- function(cv_part, formulas, y) {
 #######################################################################
 #################### Arboles con rpart ################################
 #######################################################################
-
-
 ### FIT con rpart para una lista de CP
 rpart_fit_ctrl <- function(train, formula, ctrl, method = 'class', parametros) {
   list_fit <- list()
@@ -249,3 +249,71 @@ rpart_pred_err_mc <- function(list_fit, newdata, y,type = 'class',umbral) {
   }
   list(prob = test_prob, pred = test_pred, err = test_err, mc = test_mc)
 }
+
+
+#######################################################################
+####################   RandomForest    ################################
+#######################################################################
+
+#Fit randomFprest (ensemble)
+randomForest_fit <- function(train, formula, pNtree, pMtry = sqrt(length(train)) ) {
+  list_fit <- list()
+  #h.mtry <- sqrt(length(train)) # Defino el valor como la raiz cuadrada de la cantidad de variables
+  for (i in seq(1, length(pNtree))) {
+    list_fit[[i]] <- randomForest(as.formula(formula),data = train, ntree = pNtree[i], mtry = h.mtry)
+  }
+  return(list_fit)
+}
+
+
+### Prediccion y error de clasificacion con randomforest
+randomForest_pred_err <- function(list_fit, newdata, y) {
+  test_pred <- list()
+  test_err <- rep(0, length(list_fit))
+  for (i in seq(1, length(list_fit))) {
+    #Prediction
+    test_pred[[i]] <- predict(list_fit[[i]],
+                              newdata = newdata,
+                              type = 'class') #class automatically converted to "response", for backward compatibility
+    #Clasification error
+    test_err[i] <- fn_err_cla(test_pred[[i]], newdata[[y]])
+  }
+  list(pred = test_pred, err = test_err)
+}
+
+randomForest_cv_err <- function(cv_part, formula, y, pNtree, pMtry) {
+  cv_test <- cv_part$test
+  cv_train <- cv_part$train
+  cv_matrix_err <- matrix(0, nrow = cv_part$k_folds, ncol = length(ctrl))
+  for (k in seq(1, cv_part$k_folds)) {
+    #randomForest
+    list_fit <- randomForest_fit(formula = as.formula(formula),
+                             train = cv_train[[k]],
+                             pNtree = pNtree,
+                             pMtry = pMtry)
+    #randomForest_pred_err
+    list_pred_err <- randomForest_pred_err(list_fit, newdata = cv_test[[k]], y = y)
+    cv_matrix_err[k, ] <- list_pred_err$err  
+  }
+  apply(cv_matrix_err, 2, mean)
+
+  #######################################################################
+  ####################   Boosting        ################################
+  #######################################################################
+  
+  # Fit using Boosting (gbm)
+  boosting_fit <- function(pTrain, pFormula, dDistribution = "gaussian", pControl) {
+    list_fit <- list()
+    for (i in seq(1, length(pControl))) {
+      list_fit[[i]] <- gbm(pFormula,
+                           data = pTrain,
+                           distribution = dDistribution,
+                           interaction.depth = pControl[[i]]$interaction.depth,
+                           shrinkage = pControl[[i]]$shrinkage,
+                           n.trees = pControl[[i]]$n.trees)
+      }
+      return(list_fit)
+    }
+  }
+
+
