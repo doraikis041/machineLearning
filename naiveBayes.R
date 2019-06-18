@@ -1,5 +1,4 @@
-source("Utility/head.R")
-source("Utility/funciones.R")
+source("Utility/functions.R")
 
 #Genero la grilla de visualizaci√≥n
 h.gridDF <- dfGridMetada()
@@ -10,7 +9,7 @@ h.data <- loadData()
 #definiciÛn de las formulas a utilizar
 h.formula <- c('as.factor(Churn) ~ ThreewayCalls',
                'as.factor(Churn) ~ CreditRating',
-               'as.factor(Churn) ~ Occupation + MaritalStatus')
+               'as.factor(Churn) ~ .')
 
 #Generar la particion de test & train
 h.part <- partition_train_test(h.data, ntrain = nTrain)
