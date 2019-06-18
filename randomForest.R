@@ -19,8 +19,9 @@
   h.formula <- 'as.factor(Churn) ~ .'
   
   #Definir el valor de mtry
-  h.mtry <- sqrt(length(h.train)) #h.mtry = 7 
-  h.ntree <- c(100)
+  #h.ctrl <- list(list(ntree=200, mtry= 5))
+  h.mtry <-  5 #sqrt(length(h.train))
+  h.ntree <- c(50)
   
   # Clasificacion con randomforest
   h.randomForest_fit <- randomForest_fit(train = h.train,
@@ -34,8 +35,8 @@
   
   
   # Importancia de las variables
-  importance(h.randomForest_fit[[1]])        
-  varImpPlot(h.randomForest_fit[[1]])  
+  # importance(h.randomForest_fit[[1]])        
+  # varImpPlot(h.randomForest_fit[[1]])  
   
   ######  Error en test
   h.rFTest_pred_err <- rpart_pred_err(h.randomForest_fit,
@@ -48,8 +49,8 @@
   h.rFTrain_pred_err <- rpart_pred_err(h.randomForest_fit,
                                        newdata = h.train,
                                        y = 'Churn')
-  h.rFTrain_pred <- h.rFtrain_pred_err$pred
-  h.rFTrain_err <- h.rFtrain_pred_err$err
+  h.rFTrain_pred <- h.rFTrain_pred_err$pred
+  h.rFTrain_err <- h.rFTrain_pred_err$err
 
   #Cross Validation
   h.rF_cv_err <- randomForest_cv_err(cv_part = h.cv_part,
@@ -57,16 +58,56 @@
                                         y = 'Churn',
                                         pNtree = h.ntree,
                                         pMtry = h.mtry)
+  
+  print(h.rFTest_err)
+  print( h.rFTrain_err)
+  print(h.rF_cv_err)
  
-# Plot error
-plot(h.rFTest_err, type = 'l', col = 'red', ylim = c(0., 0.4),
-     main = 'Error de prediccion Rpart',
-     ylab = 'Error de clasificacion',
-     xlab = 'Hipotesis', xaxt = 'n')
-lines(h.rFTrain_err, col = 'blue')
-lines(h.rF_cv_err, col = 'magenta')
-axis(1, at = seq(1, length(h.ctrl)))
- # legend("topright", legend = c('train', 'test', 'cv'),
- #       col = c('blue', 'red', 'magenta'), lty = c(1, 1, 1))
+  
+  
+  # plot_umbral_err <- function(list_err, umbral, main = '') {
+  #   # list_err: lista de vectores de la misma longitud
+  #   col_vec <- rainbow(length(list_err))
+  #   plot(list_err[[1]], 
+  #        type = 'l', 
+  #        col = col_vec[1], 
+  #        main = main, 
+  #        ylab = 'Error', 
+  #        xlab = 'Umbral', 
+  #        xaxt = 'n')
+  #   axis(1, 
+  #        at = seq(1, length(umbral)), 
+  #        labels = umbral)
+  #   for (i in seq(2, length(list_err))) {
+  #     lines(list_err[[i]], col = col_vec[i])
+  #   }
+  #   legend("bottomleft", 
+  #          cex = 0.5,
+  #          legend = seq(1, length(list_err)), 
+  #          col = col_vec,
+  #          lty = rep(1, length(list_err)))
+  # }
+  # 
+  # plot_umbral_err()
+  
+
+#plot_umbral_err(h.gbm_test_pred_err, main = 'Error de GBM', umbral = h.umbral)
+  
+  
+  
+#Plot error
+plot(h.rF_cv_err)
+points(h.rFTrain_err, col = 'blue')
+points(h.rF_cv_err, col = 'magenta')
+# , type = 'l', col = 'red'),
+#      main = 'Error de prediccion Rpart',
+#      ylab = 'Error de clasificacion',
+#      xlab = 'Hipotesis', xaxt = 'n')
+# lines(h.rFTrain_err, col = 'blue')
+# lines(h.rF_cv_err, col = 'magenta')
+# axis(1, at = seq(1, length(1))) # axis(1, at = seq(1, length(h.ctrl)))
+#  # legend("topright", legend = c('train', 'test', 'cv'),
+#  #       col = c('blue', 'red', 'magenta'), lty = c(1, 1, 1))
+# 
 
 
