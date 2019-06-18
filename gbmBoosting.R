@@ -15,58 +15,11 @@ h.cv_part <- partition_cv(df = h.train,k_folds = 5 )
 h.formula <- 'as.factor(Churn) ~ .'
 
 #Definir los parametros del modelo
-h.ctrl <- list(list(interaction.depth=2, shrinkage =0.01,n.trees = 10))
+h.ctrl <- list(list(depth=2, shrinkage =0.01,ntree = 10))
 
 # # Clasificacion con randomforest
- boosting_fit <- randomForest_fit(pTrain = h.train,
-                                  pFormula = h.formula,
-                                  pControl = h.ctrl)
-
-# Prueba de la llamada al algoritmo
-# a <-gbm(Churn ~.,
-#         data = h.train,
-#         distribution = "gaussian",
-#         interaction.depth = h.ctrl[[1]]$pInteraction.depth,
-#         shrinkage = h.ctrl[[1]]$pShrinkage,
-#         n.trees = h.ctrl[[1]]$pN.trees)
-# # print(a)
-# # plot(a)
-# 
-# 
-# # Importancia de las variables
-# importance(h.randomForest_fit[[1]])        
-# varImpPlot(h.randomForest_fit[[1]])  
-# 
-# ######  Error en test
-# h.rFTest_pred_err <- rpart_pred_err(h.randomForest_fit,
-#                                     newdata = h.test,
-#                                     y = 'Churn')
-# h.rFTest_pred <- h.rFTest_pred_err$pred
-# h.rFTest_err <- h.rFTest_pred_err$err
-# 
-# ###### Error en train
-# h.rFTrain_pred_err <- rpart_pred_err(h.randomForest_fit,
-#                                      newdata = h.train,
-#                                      y = 'Churn')
-# h.rFTrain_pred <- h.rFtrain_pred_err$pred
-# h.rFTrain_err <- h.rFtrain_pred_err$err
-# 
-# #Cross Validation
-# h.rF_cv_err <- randomForest_cv_err(cv_part = h.cv_part,
-#                                    formula = h.formula,
-#                                    y = 'Churn',
-#                                    pNtree = h.ntree,
-#                                    pMtry = h.mtry)
-# 
-# # Plot error
-# plot(h.rFTest_err, type = 'l', col = 'red', ylim = c(0., 0.4),
-#      main = 'Error de prediccion Rpart',
-#      ylab = 'Error de clasificacion',
-#      xlab = 'Hipotesis', xaxt = 'n')
-# lines(h.rFTrain_err, col = 'blue')
-# lines(h.rF_cv_err, col = 'magenta')
-# axis(1, at = seq(1, length(h.ctrl)))
-# # legend("topright", legend = c('train', 'test', 'cv'),
-# #       col = c('blue', 'red', 'magenta'), lty = c(1, 1, 1))
-# 
-# 
+ boosting_fit <- gbm_fit_ctrl(train = h.train,
+                              formula = h.formula,
+                              ctrl = h.ctrl)
+ 
+ 
