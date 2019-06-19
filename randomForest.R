@@ -20,7 +20,7 @@
   h.formula <- 'as.factor(Churn) ~ .'
   fn_err <- fn_err_cost #fn_err_cla
   
-  #Definir el valor de mtry
+  #Definir el valor de mtry y ntree
   h.rf_ctrl <- list(ctrl1 = list(ntree = 100, mtry = 5)
                    #,ctrl2 = list(ntree = 200, mtry = 5)
                    # ,ctrl3 = list(ntree = 300, mtry = 5)
@@ -54,3 +54,37 @@
   
   #Plot del error en RamdomForest
   plot_umbral_err(h.randomForest_predErr, main = 'Error (Random Forest)', umbral = h.umbral)
+  
+  
+  #Mejores resueltados para cada kipotesis
+
+  
+  
+  # Croos Validation
+  # Hipotesis 1 con umbral 0.6
+  h.rf_test_err_1 <- h.randomForest_predErr[[1]][6]
+  h.rf_cv_ctrl_1 <- list(h1 = h.rf_ctrl[[1]])
+  h.rf_cv_umbral_1 <- h.umbral[6]
+  h.rf_cv_err_1 <- rf_cv_err(h.cv_part, 
+                             formula = h.formula, 
+                             ctrl = h.rf_cv_ctrl_1, 
+                             umbral = h.rf_cv_umbral_1,
+                             var_y = 'Churn') 
+  print(paste('Error h1 -', 
+              'umbral:', h.rf_cv_umbral_1, 
+              'test:', h.rf_test_err_1, 
+              'cv:', h.rf_cv_err_1))
+  
+  # Hipotesis 2 con umbral 0.5
+  h.rf_test_err_2 <- h.randomForest_predErr[[2]][5]
+  h.rf_cv_ctrl_2 <- list(h2 = h.rf_ctrl[[2]])
+  h.rf_cv_umbral_2 <- h.umbral[5]
+  h.rf_cv_err_2 <- rf_cv_err(h.cv_part, 
+                             formula = h.formula, 
+                             ctrl = h.rf_cv_ctrl_2, 
+                             umbral = h.rf_cv_umbral_2,
+                             var_y = 'Churn')
+  print(paste('Error h2 -', 
+              'umbral:', h.rf_cv_umbral_2, 
+              'test:', h.rf_test_err_2, 
+              'cv:', h.rf_cv_err_2))
