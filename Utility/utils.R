@@ -37,6 +37,36 @@ fn_err_cost <- function(yhat, y) {
   return((fp_cost + tp_cost) / length(y)) 
 }
 
+# Prediccion para un vector de umbrales
+fn_pred <- function(test_prob, umbral) {
+  # test_prob: lista retornada para varios algoritmos
+  # umbral: vector de umbrales entre 0 y 1
+  test_pred <- list()
+  for (i in seq(1, length(test_prob))) {
+    test_pred[[i]] <- list()
+    for (j in seq(1, length(umbral))) {
+      # prediccion
+      test_pred[[i]][[j]] <- ifelse(test_prob[[i]] > umbral[j], 1, 0)
+    }
+  }
+  return(test_pred)
+}
+
+# Error de prediccion para una lista de predicciones
+fn_pred_err <- function(test_pred, y) {
+  # test_pred: lista retornada por rf_pred
+  test_pred_err <- list()
+  for (i in seq(1, length(test_pred))) {
+    test_pred_err[[i]] <- rep(0, length(test_pred[[i]]))
+    for (j in seq(1, length(test_pred[[i]]))) {
+      # error
+      test_pred_err[[i]][j] <- fn_err(test_pred[[i]][[j]], y)
+    }
+  }
+  return(test_pred_err)
+}
+
+
 # particion train-test
 partition_train_test <- function(df, ntrain = 100) {
   train_idx <- sample.int(nrow(df), size = ntrain)
@@ -261,10 +291,9 @@ gbm_cv_err <- function(cv_part, formula, ctrl, umbral = 0.5, var_y) {
 }
 
 
-#  ************** Rpart
+#  ************** Rpart  **************
 
 # Clasificacion con rpart para una lista de formulas
-
 rpart_fit_formulas <- function(train, formulas, method = 'class') {
   list_fit <- list()
   for (i in seq(1, length(formulas))) {
@@ -276,7 +305,6 @@ rpart_fit_formulas <- function(train, formulas, method = 'class') {
 }
 
 # Clasificacion con rpart para una lista de cp
-
 rpart_fit_ctrl <- function(train, formula, ctrl, method = 'class') {
   list_fit <- list()
   for (i in seq(1, length(ctrl))) {
@@ -288,8 +316,24 @@ rpart_fit_ctrl <- function(train, formula, ctrl, method = 'class') {
   return(list_fit)
 }
 
-# Plot de lista de arboles
+rpart_prob <- function(list_fit, newdata) {
+  # list_fit: lista retornada por rpart_fit_ctrl || rpart_fit_formulas
+  # newdata: datos de test
+  test_prob <- list()
+  for (i in seq(1, length(list_fit))) {
+    # prediccion
+    test_prob[[i]] <- predict(list_fit[[i]], 
+                              newdata = newdata,
+                              type = 'prob')[,2]
+  }
+  return(test_prob)
+}
 
+
+
+
+
+# Plot de lista de arboles
 rpart_plot_fit <- function(list_tree) {
   for (i in seq(1, length(list_tree))) {
     rpart.plot(list_tree[[i]], roundint = FALSE)
@@ -297,7 +341,6 @@ rpart_plot_fit <- function(list_tree) {
 }
 
 # Prediccion y error de clasificacion con rpart
-
 rpart_pred_err <- function(list_fit, newdata, y) {
   test_pred <- list()
   test_err <- rep(0, length(list_fit))
@@ -305,22 +348,50 @@ rpart_pred_err <- function(list_fit, newdata, y) {
     # prediccion
     test_pred[[i]] <- predict(list_fit[[i]], newdata = newdata, type = 'class')
     # error de clasificacion
-    test_err[i] <- fn_err_cla(test_pred[[i]], newdata[[y]])
+    test_err[i] <- fn_err(test_pred[[i]], newdata[[y]])
   }
   list(pred = test_pred, err = test_err)
 }
 
 # Prediccion y error de cv con rpart
-
-rpart_cv_err <- function(cv_part, formula, ctrl, y) {
+# Error de CV
+rpart_cv_err <- function(cv_part, formula, ctrl, umbral = 0.5, var_y) {
+  # cv_part: particion generada por partition_cv
+  # formula: formula
+  # ctrl: lista de controles de rf
+  # umbral: umbral para calcular la prediccion
+  # y: variable a predecir
   cv_test <- cv_part$test
   cv_train <- cv_part$train
-  cv_matrix_err <- matrix(0, nrow = cv_part$k_folds, ncol = length(ctrl))
+  cv_err <- list()
   for (k in seq(1, cv_part$k_folds)) {
+    # fit
     list_fit <- rpart_fit_ctrl(cv_train[[k]], 
-                               formula = formula, ctrl = ctrl)
-    list_pred_err <- rpart_pred_err(list_fit, newdata = cv_test[[k]], y = y)
-    cv_matrix_err[k, ] <- list_pred_err$err  
+                             formula = formula, 
+                             ctrl = ctrl)
+    # prob
+    list_prob <- rpart_prob(list_fit, 
+                          newdata = cv_test[[k]])
+    # pred
+    list_pred <- fn_pred(list_prob, 
+                          umbral = umbral) 
+    # error
+    cv_err[[k]] <- fn_pred_err(list_pred, 
+                                cv_test[[k]][[var_y]])
   }
-  apply(cv_matrix_err, 2, mean)
+  return(mean(unlist(cv_err)))
 }
+
+
+# rpart_cv_err <- function(cv_part, formula, ctrl, y) {
+#   cv_test <- cv_part$test
+#   cv_train <- cv_part$train
+#   cv_matrix_err <- matrix(0, nrow = cv_part$k_folds, ncol = length(ctrl))
+#   for (k in seq(1, cv_part$k_folds)) {
+#     list_fit <- rpart_fit_ctrl(cv_train[[k]], 
+#                                formula = formula, ctrl = ctrl)
+#     list_pred_err <- rpart_pred_err(list_fit, newdata = cv_test[[k]], y = y)
+#     cv_matrix_err[k, ] <- list_pred_err$err  
+#   }
+#   apply(cv_matrix_err, 2, mean)
+# }
