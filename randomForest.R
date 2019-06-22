@@ -1,7 +1,7 @@
   source("Utility/utils.R")
   
   #Vector de umbrales para la predición
-  h.umbral <- seq(0.1, to = 0.9, by = 0.1)
+  h.umbral <- seq(0.32, to = 0.42, by = 0.02)
   
   #Se carga los datos con las ETL generales
   h.data <- loadData()
@@ -21,16 +21,14 @@
   fn_err <- fn_err_cost #fn_err_cla
   
   #Definir el valor de mtry y ntree
-  h.rf_ctrl <- list(ctrl1 = list(ntree = 500, mtry = 7)
-                   ,ctrl2 = list(ntree = 500, mtry = 5)
-                    ,ctrl3 = list(ntree = 500, mtry = 6)
-                    ,ctrl4 = list(ntree = 550, mtry = 6)
-                   ,ctrl5 = list(ntree = 450, mtry = 7)
-                   ,ctrl6 = list(ntree = 450, mtry = 6)
+  h.rf_ctrl <- list(ctrl2 = list(ntree = 550, mtry = 7)
+                    ,ctrl4 = list(ntree = 600, mtry = 6)
+                    ,ctrl5 = list(ntree = 600, mtry = 7)
+                    ,ctrl6 = list(ntree = 600, mtry = 8)
+                    ,ctrl7 = list(ntree = 700, mtry = 7)
   )
   
-  
-  
+
   # Entrenamiento de randomforest train, formula, ctrl
   h.randomForest_fit <- rf_fit_ctrl(h.train,
                                     h.formula,
