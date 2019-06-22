@@ -21,13 +21,14 @@
   fn_err <- fn_err_cost #fn_err_cla
   
   #Definir el valor de mtry y ntree
-  h.rf_ctrl <- list(ctrl1 = list(ntree = 100, mtry = 7)
-                   #,ctrl2 = list(ntree = 200, mtry = 5)
-                   # ,ctrl3 = list(ntree = 300, mtry = 5)
-                   # ,ctrl4 = list(ntree = 100, mtry = 7)
-                    #,ctrl5 = list(ntree = 200, mtry = 7)
-                    #,ctrl6 = list(ntree = 300, mtry = 7)
+  h.rf_ctrl <- list(ctrl1 = list(ntree = 500, mtry = 7)
+                   ,ctrl2 = list(ntree = 500, mtry = 5)
+                    ,ctrl3 = list(ntree = 500, mtry = 6)
+                    ,ctrl4 = list(ntree = 550, mtry = 6)
+                   ,ctrl5 = list(ntree = 450, mtry = 7)
+                   ,ctrl6 = list(ntree = 450, mtry = 6)
   )
+  
   
   
   # Entrenamiento de randomforest train, formula, ctrl
@@ -75,10 +76,10 @@
               'test:', h.rf_test_err_1, 
               'cv:', h.rf_cv_err_1))
   
-  # Hipotesis 2 con umbral 0.5
-  h.rf_test_err_2 <- h.randomForest_predErr[[2]][5]
-  h.rf_cv_ctrl_2 <- list(h2 = h.rf_ctrl[[2]])
-  h.rf_cv_umbral_2 <- h.umbral[5]
+  # Hipotesis 1 con umbral 0.4
+  h.rf_test_err_2 <- h.randomForest_predErr[[1]][4]
+  h.rf_cv_ctrl_2 <- list(h2 = h.rf_ctrl[[1]])
+  h.rf_cv_umbral_2 <- h.umbral[4]
   h.rf_cv_err_2 <- rf_cv_err(h.cv_part, 
                              formula = h.formula, 
                              ctrl = h.rf_cv_ctrl_2, 
@@ -91,6 +92,11 @@
   
   
   print('Generacion de la prediccion sobre test sample')
+  
+  
+  # Hipotesis 4 con umbral 0.4   print('Generacion de la prediccion sobre test sample')
+  
+  
   
   h.test_sample <- read.csv('data/test_sample.csv')
   h.CustomerID <- h.test_sample$CustomerID
