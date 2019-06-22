@@ -20,12 +20,12 @@
   h.gbm_formula <- 'Churn ~ .'
   fn_err <- fn_err_cost #fn_err_cla
   
-  h.gbm_ctrl <- list(ctrl1 = list(ntree = 100, depth = 1, shrinkage = 0.1)
-                    # ,ctrl2 = list(ntree = 200, depth = 1, shrinkage = 0.01)
-                    # ,ctrl3 = list(ntree = 300, depth = 1, shrinkage = 0.001)
-                    # ,ctrl4 = list(ntree = 100, depth = 2, shrinkage = 0.1)
-                     ,ctrl5 = list(ntree = 200, depth = 2, shrinkage = 0.01)
-                    # ,ctrl6 = list(ntree = 300, depth = 2, shrinkage = 0.001)
+  h.gbm_ctrl <- list(ctrl1 = list(ntree = 500, depth = 25, shrinkage = 0.1)
+                     ,ctrl2 = list(ntree = 600, depth = 30, shrinkage = 0.01)
+                     ,ctrl3 = list(ntree = 400, depth = 25, shrinkage = 0.001)
+                     ,ctrl4 = list(ntree = 500, depth = 30, shrinkage = 0.01)
+                     ,ctrl5 = list(ntree = 600, depth = 25, shrinkage = 0.01)
+                     ,ctrl6 = list(ntree = 400, depth = 30, shrinkage = 0.001)
   )
   
   # Entrenamiento de boosting train, formula, ctrl

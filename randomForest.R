@@ -21,7 +21,7 @@
   fn_err <- fn_err_cost #fn_err_cla
   
   #Definir el valor de mtry y ntree
-  h.rf_ctrl <- list(ctrl1 = list(ntree = 100, mtry = 5)
+  h.rf_ctrl <- list(ctrl1 = list(ntree = 100, mtry = 7)
                    #,ctrl2 = list(ntree = 200, mtry = 5)
                    # ,ctrl3 = list(ntree = 300, mtry = 5)
                    # ,ctrl4 = list(ntree = 100, mtry = 7)
@@ -89,5 +89,26 @@
               'test:', h.rf_test_err_2, 
               'cv:', h.rf_cv_err_2))
   
+  
+  print('Generacion de la prediccion sobre test sample')
+  
+  h.test_sample <- read.csv('data/test_sample.csv')
+  h.CustomerID <- h.test_sample$CustomerID
+  h.test_sample$CustomerID <- NULL
+  h.test_sample$ServiceArea <- NULL
+  
+  h.hip_prob <- ... # calcular la probabilidad de la hipotesis seleccionada sobre test_sample
+  h.hip_pred <- ... # calcular la prediccion para el umbral seleccionado
+  h.Churn <- as.logical(h.hip_pred[[1]][[1]]) # convertir 1->TRUE / 0->FALSE
+  
+  print('Generar salida')
+  
+  h.output <- data.frame(CustomerID = h.CustomerID, 
+                         Churn = h.Churn)
+  write.csv(h.output, 
+            file = "test_sample_pred.csv", 
+            row.names = FALSE)
+  
+  print('Done')
   
  
