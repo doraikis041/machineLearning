@@ -2,7 +2,7 @@
   source("Utility/utils.R")
  
   #Umbral para la ejecución de la matriz de confusión
-  h.umbral <- seq(0.3, to = 0.7, by = 0.1)
+  h.umbral <- seq(0.32, to = 0.48, by = 0.02)
   
   #Se carga los datos con las ETL generales
   h.data <- loadData()
@@ -22,9 +22,12 @@
   fn_err <- fn_err_cost #fn_err_cla
   
   # cp mientras mas chico es cp mas complejo es
-  h.rpart_ctrl <- list(ctrl1 = rpart.control(minsplit = 1, maxdepth = 5, cp = 0.0001)
-                      ,ctrl2 = rpart.control(minsplit = 1, maxdepth = 5, cp = 0.001)
-                      ,ctrl3 = rpart.control(minsplit = 1, maxdepth = 5, cp = 0.01)
+  h.rpart_ctrl <- list(ctrl1 = rpart.control(minsplit = 1, maxdepth = 15, cp = 0.00001)
+                      ,ctrl2 = rpart.control(minsplit = 1, maxdepth = 15, cp = 0.0001)
+                      ,ctrl3 = rpart.control(minsplit = 1, maxdepth = 15, cp = 0.001)
+                      ,ctrl4 = rpart.control(minsplit = 1, maxdepth = 20, cp = 0.00001)
+                      ,ctrl5 = rpart.control(minsplit = 1, maxdepth = 20, cp = 0.0001)
+                      ,ctrl6 = rpart.control(minsplit = 1, maxdepth = 20, cp = 0.001)
                       )
   
   #Entrenamiento de Tree (Rpart) train, formula, ctrl
@@ -87,67 +90,34 @@
               'cv:', h.rpart_cv_err_2))
   
   
-  print('Generacion de la prediccion sobre test sample')
+ 
+   print('Generacion de la prediccion sobre test sample')
   
   h.test_sample <- read.csv('Dataset/test_sample.csv')
   h.CustomerID <- h.test_sample$CustomerID
   h.test_sample$CustomerID <- NULL
   h.test_sample$ServiceArea <- NULL
-  
+  h.hip_fit <- list(h.rpart_fit[[4]])
+  h.hip_umbral <- c(h.umbral[4])
+
   # calcular la probabilidad de la hipotesis seleccionada sobre test_sample
-  h.hip_prob <- rpart_prob(list_fit = h.rpart_fit[[]]
-                                           ,newdata = h.test_sample)
+  h.hip_prob <- rpart_prob(list_fit = h.hip_fit
+                          ,newdata = h.test_sample)
+
   # calcular la prediccion para el umbral seleccionado
-  h.hip_pred <- h.rpart_pred <- fn_pred(test_prob = h.rpart_prob
-                                        ,umbral = h.umbral[[2]])
-# 
-#   h.Churn <- as.logical(h.hip_pred[[1]][[1]]) # convertir 1->TRUE / 0->FALSE
-#   
-#   print('Generar salida')
-#   
-#   h.output <- data.frame(CustomerID = h.CustomerID, 
-#                          Churn = h.Churn)
-#   write.csv(h.output, 
-#             file = "test_sample_pred.csv", 
-#             row.names = FALSE)
-#   
-#   print('Done')
+  h.hip_pred <- fn_pred(test_prob = h.hip_prob
+                        ,umbral = h.hip_umbral)
   
-  
-  
-  
-  
-  
-  
-  
-  
-   ## Anterior codigo ####
-  
-  # # Error en test
-  # h.rpart_test_pred_err <- rpart_pred_err(h.tree_fit, newdata = h.test, y = 'Churn')
-  # h.rpart_test_pred <- h.rpart_test_pred_err$pred
-  # h.rpart_test_err <- h.rpart_test_pred_err$err
-  # # 
-  # # Error en train
-  # h.rpart_train_pred_err <- rpart_pred_err(h.tree_fit, newdata = h.train, y = 'Churn')
-  # h.rpart_train_pred <- h.rpart_train_pred_err$pred
-  # h.rpart_train_err <- h.rpart_train_pred_err$err
-  # 
-  #  
-  # h.rpart_cv_err <- rpart_cv_err(h.cv_part, h.formula, h.ctrl, y = 'Churn')
-  # 
-  # 
-  # 
-  # h.rpart_mc_err <- rpart_pred_err_mc(h.tree_fit, newdata = h.train, y = 'Churn',type = 'class',umbral = umbral)
-  
-  # # Plot error
-  # plot(h.rpart_test_err, type = 'l', col = 'red', ylim = c(0., 0.3),
-  #      main = 'Error de prediccion Rpart',
-  #      ylab = 'Error de clasificacion',
-  #      xlab = 'Hipotesis', xaxt = 'n')
-  # lines(h.rpart_train_err, col = 'blue')
-  # lines(h.rpart_cv_err, col = 'magenta')
-  # axis(1, at = seq(1, length(h.ctrl)))
-  # # legend("topright", legend = c('train', 'test', 'cv'),
-  # #        col = c('blue', 'red', 'magenta'), lty = c(1, 1, 1))
-  
+  h.Churn <- as.logical(h.hip_pred[[1]][[1]]) # convertir 1->TRUE / 0->FALSE
+
+  print('Generar salida')
+
+  h.output <- data.frame(CustomerID = h.CustomerID,
+                         Churn = h.Churn)
+  write.csv(h.output,
+            file = "test_sample_pred.csv",
+            row.names = FALSE)
+
+  print('Done')
+
+
