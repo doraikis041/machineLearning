@@ -1,7 +1,7 @@
   source("Utility/utils.R")
   
   #Vector de umbrales para la predición
-  h.umbral <- seq(0.32, to = 0.42, by = 0.02)
+  h.umbral <- seq(0.32, to = 0.42, by = 0.01)
   
   #Se carga los datos con las ETL generales
   h.data <- loadData()
@@ -21,11 +21,31 @@
   fn_err <- fn_err_cost #fn_err_cla
   
   #Definir el valor de mtry y ntree
-  h.rf_ctrl <- list(ctrl2 = list(ntree = 550, mtry = 7)
-                    ,ctrl4 = list(ntree = 600, mtry = 6)
-                    ,ctrl5 = list(ntree = 600, mtry = 7)
-                    ,ctrl6 = list(ntree = 600, mtry = 8)
-                    ,ctrl7 = list(ntree = 700, mtry = 7)
+  h.rf_ctrl <- list(ctrl1 = list(ntree = 500, mtry = 5)
+                    ,ctrl2 = list(ntree = 500, mtry = 6)
+                    ,ctrl3 = list(ntree = 500, mtry = 7)
+                    ,ctrl4 = list(ntree = 500, mtry = 8)
+                    ,ctrl5 = list(ntree = 525, mtry = 5)
+                    ,ctrl6 = list(ntree = 525, mtry = 6)
+                    ,ctrl7 = list(ntree = 525, mtry = 7)
+                    ,ctrl8 = list(ntree = 525, mtry = 8)
+                    ,ctrl9 = list(ntree = 550, mtry = 5)
+                    ,ctrl10 = list(ntree = 550, mtry = 6)
+                    ,ctrl11 = list(ntree = 550, mtry = 7)
+                    ,ctrl12 = list(ntree = 550, mtry = 8)
+                    ,ctrl13 = list(ntree = 575, mtry = 5)
+                    ,ctrl14 = list(ntree = 575, mtry = 6)
+                    ,ctrl15 = list(ntree = 575, mtry = 7)
+                    ,ctrl16 = list(ntree = 575, mtry = 8)
+                    ,ctrl17 = list(ntree = 600, mtry = 5)
+                    ,ctrl18 = list(ntree = 600, mtry = 6)
+                    ,ctrl19 = list(ntree = 600, mtry = 7)
+                    ,ctrl20 = list(ntree = 600, mtry = 8)
+                    ,ctrl21 = list(ntree = 625, mtry = 5)
+                    ,ctrl22 = list(ntree = 625, mtry = 6)
+                    ,ctrl23 = list(ntree = 625, mtry = 7)
+                    ,ctrl24 = list(ntree = 625, mtry = 8)  
+                    
   )
   
 
@@ -91,8 +111,6 @@
   
   print('Generacion de la prediccion sobre test sample')
   
-  
-  # Hipotesis 4 con umbral 0.4   print('Generacion de la prediccion sobre test sample')
   
   
   
