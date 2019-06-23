@@ -59,11 +59,11 @@
 
   
   
-  # Croos Validation
-  # Hipotesis 1 con umbral 0.6
-  h.rf_test_err_1 <- h.randomForest_predErr[[1]][6]
-  h.rf_cv_ctrl_1 <- list(h1 = h.rf_ctrl[[1]])
-  h.rf_cv_umbral_1 <- h.umbral[6]
+  # Cross Validation
+  # Control 3 con umbral 0.38
+  h.rf_test_err_1 <- h.randomForest_predErr[[3]][4]
+  h.rf_cv_ctrl_1 <- list(h1 = h.rf_ctrl[[3]])
+  h.rf_cv_umbral_1 <- h.umbral[4]
   h.rf_cv_err_1 <- rf_cv_err(h.cv_part, 
                              formula = h.formula, 
                              ctrl = h.rf_cv_ctrl_1, 
@@ -74,9 +74,9 @@
               'test:', h.rf_test_err_1, 
               'cv:', h.rf_cv_err_1))
   
-  # Hipotesis 1 con umbral 0.4
-  h.rf_test_err_2 <- h.randomForest_predErr[[1]][4]
-  h.rf_cv_ctrl_2 <- list(h2 = h.rf_ctrl[[1]])
+  # Control 5 con umbral 0.38
+  h.rf_test_err_2 <- h.randomForest_predErr[[5]][4]
+  h.rf_cv_ctrl_2 <- list(h2 = h.rf_ctrl[[5]])
   h.rf_cv_umbral_2 <- h.umbral[4]
   h.rf_cv_err_2 <- rf_cv_err(h.cv_part, 
                              formula = h.formula, 
