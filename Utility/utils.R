@@ -90,18 +90,20 @@ partition_cv <- function(df, k_folds = 5) {
 plot_umbral_err <- function(list_err, umbral, main = '') {
   # list_err: lista de vectores de la misma longitud
   col_vec <- rainbow(length(list_err))
-  indx <- vector()
+  indxMin <- vector()
   for (i in seq(1, length(list_err))) {
-    indx[i] <- min(unlist(list_err[[i]]) )
+    indxMin[i] <- min(unlist(list_err[[i]]))
   }
-  index <- as.numeric(which.min(indx))
-  plot(list_err[[index]], 
-       type = 'l', 
-       col = col_vec[index], 
-       main = main, 
-       ylab = 'Error', 
-       xlab = 'Umbral', 
-       xaxt = 'n')
+  indexMin <- as.numeric(which.min(indxMin))
+  plot(list_err[[indexMin]]
+       ,type = 'l'
+       ,col = col_vec[indexMin]
+       ,main = main
+       ,ylab = 'Error' 
+       ,xlab = 'Umbral'
+       ,xaxt = 'n'
+       ,ylim = c(min(unlist(list_err)),max(unlist(list_err)))
+       )
   axis(1, at = seq(1, length(umbral)), 
        labels = umbral)
   for (i in seq(2, length(list_err))) {
