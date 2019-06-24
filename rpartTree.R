@@ -57,41 +57,20 @@
   
   
   #Mejores resueltados para cada kipotesis
+  h.firstErr = 2
+  h.first <- fn_order_error(listError = h.rpart_pred_err,
+                            firstErr = h.firstErr)
   
-  # Error en Croos Validation
-  # Hipotesis 1 con umbral 0.4
-  h.rpart_test_err_1 <- h.rpart_pred_err[[1]][4]
-  h.rpart_cv_ctrl_1 <- list(h1 = h.rpart_ctrl[[1]])
-  h.rpart_cv_umbral_1 <- h.umbral[4]
-  #cv_part, formula, ctrl, y
-  h.rpart_cv_err_1 <- rpart_cv_err(cv_part = h.cv_part, 
-                                  formula = h.formula, 
-                                  ctrl = h.rpart_cv_ctrl_1, 
-                                  umbral = h.rpart_cv_umbral_1,
-                                  var_y = 'Churn') 
-  print(paste('Error h1 -', 
-              'umbral:', h.rpart_cv_umbral_1, 
-              'test:', h.rpart_test_err_1, 
-              'cv:', h.rpart_cv_err_1))
-  
-  # Hipotesis 4 con umbral 0.3
-  h.rpart_test_err_2 <- h.rpart_pred_err[[2]][3]
-  h.rpart_cv_ctrl_2 <- list(h1 = h.rpart_ctrl[[2]])
-  h.rpart_cv_umbral_2 <- h.umbral[3]
-  #cv_part, formula, ctrl, y
-  h.rpart_cv_err_2 <- rpart_cv_err(cv_part = h.cv_part, 
-                                   formula = h.formula, 
-                                   ctrl = h.rpart_cv_ctrl_2, 
-                                   umbral = h.rpart_cv_umbral_2,
-                                   var_y = 'Churn') 
-  print(paste('Error h1 -', 
-              'umbral:', h.rpart_cv_umbral_2, 
-              'test:', h.rpart_test_err_2, 
-              'cv:', h.rpart_cv_err_2))
+  #Ejecución de las CV con los mejores errores
+  rpartCVAutomatic.r <- rpartCVAutomatic(h.first = firstResult,
+                                         cv_part = h.cv_part, 
+                                         formula = h.formula, 
+                                         ctrl = h.rpart_ctrl, 
+                                         umbral = h.umbral,
+                                         var_y = 'Churn')
   
   
- 
-   print('Generacion de la prediccion sobre test sample')
+  print('Generacion de la prediccion sobre test sample')
   
   h.test_sample <- read.csv('Dataset/test_sample.csv')
   h.CustomerID <- h.test_sample$CustomerID
