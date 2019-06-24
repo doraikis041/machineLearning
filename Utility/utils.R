@@ -229,7 +229,33 @@ rf_cv_err <- function(cv_part, formula, ctrl, umbral = 0.5, var_y) {
   return(mean(unlist(cv_err)))
 }
 
-
+#Ejecuta el CV para las primeras mejores resultados
+rfCVAutomatic <- function(firstError, cv_part, formula, ctrl, umbral, var_y)
+{
+  result <- list()
+  for (i in seq(nrow(firstError$dfError))) {
+    h.control <- list(h1 = ctrl[[firstError$dfError$control[i]]])
+    h.humbral <- h.umbral[firstError$dfError$umbral[i]]
+    
+    #cv_part, formula, ctrl, y
+    h.cv_error <- rf_cv_err(cv_part = h.cv_part,
+                             formula = h.formula,
+                             ctrl = h.control,
+                             umbral = h.humbral,
+                             var_y = 'Churn') 
+    
+    
+    result[[i]] <- c(mensaje = paste(paste('Error H', i, " - "), 
+                                     'umbral:', h.humbral, 
+                                     'test:', firstError$dfError$error[i], 
+                                     'cv:', h.cv_error),
+                     errorTest = firstError$dfError$error[i],
+                     errorCV = h.cv_error
+    )
+  }
+  
+  return(result) 
+}
 
 #************** Boosting ******************
 gbm_fit_ctrl <- function(train, formula, ctrl) {
@@ -319,6 +345,34 @@ gbm_cv_err <- function(cv_part, formula, ctrl, umbral = 0.5, var_y) {
                                 cv_test[[k]][[var_y]])
   }
   return(mean(unlist(cv_err)))
+}
+
+#Ejecuta el CV para las primeras mejores resultados
+gbmCVAutomatic <- function(firstError, cv_part, formula, ctrl, umbral, var_y)
+{
+  result <- list()
+  for (i in seq(nrow(firstError$dfError))) {
+    h.control <- list(h1 = ctrl[[firstError$dfError$control[i]]])
+    h.humbral <- h.umbral[firstError$dfError$umbral[i]]
+    
+    #cv_part, formula, ctrl, y
+    h.cv_error <- gbm_cv_err(cv_part = h.cv_part,
+                             formula = h.formula,
+                             ctrl = h.control,
+                             umbral = h.humbral,
+                             var_y = 'Churn') 
+    
+    
+    result[[i]] <- c(mensaje = paste(paste('Error H', i, " - "), 
+                                     'umbral:', h.humbral, 
+                                     'test:', firstError$dfError$error[i], 
+                                     'cv:', h.cv_error),
+                     errorTest = firstError$dfError$error[i],
+                     errorCV = h.cv_error
+    )
+  }
+  
+  return(result) 
 }
 
 #######################################################################
@@ -415,27 +469,27 @@ rpart_cv_err <- function(cv_part, formula, ctrl, umbral = 0.5, var_y) {
 
 
 #Ejecuta el CV para las primeras mejores resultados
-rpartCVAutomatic <- function(cv_part, formula, ctrl, umbral, var_y)
+rpartCVAutomatic <- function(firstError, cv_part, formula, ctrl, umbral, var_y)
 {
   result <- list()
-  for (i in seq(nrow(h.first$dfError))) {
-    h.rpart_cv_ctrl_1 <- list(h1 = h.rpart_ctrl[[h.first$dfError$control[i]]])
-    h.rpart_cv_umbral_1 <- h.umbral[h.first$dfError$umbral[i]]
+  for (i in seq(nrow(firstError$dfError))) {
+    h.control <- list(h1 = h.rpart_ctrl[[firstError$dfError$control[i]]])
+    h.humbral <- h.umbral[firstError$dfError$umbral[i]]
     
     #cv_part, formula, ctrl, y
-    h.rpart_cv_err_1 <- rpart_cv_err(cv_part = h.cv_part, 
+    h.cv_error <- rpart_cv_err(cv_part = h.cv_part, 
                                      formula = h.formula, 
-                                     ctrl = h.rpart_cv_ctrl_1, 
-                                     umbral = h.rpart_cv_umbral_1,
+                                     ctrl = h.control, 
+                                     umbral = h.humbral,
                                      var_y = 'Churn') 
     
     
-    result[[i]] <- c(mensaje = paste('Error h1 -', 
-                                     'umbral:', h.rpart_cv_umbral_1, 
-                                     'test:', h.first$dfError$error[i], 
-                                     'cv:', h.rpart_cv_err_1),
-                     errorTest = h.first$dfError$error[i],
-                     errorCV = h.rpart_cv_err_1
+    result[[i]] <- c(mensaje = paste(paste('Error H', i, " - "), 
+                                     'umbral:', h.humbral, 
+                                     'test:', firstError$dfError$error[i], 
+                                     'cv:', h.cv_error),
+                     errorTest = firstError$dfError$error[i],
+                     errorCV = h.cv_error
     )
   }
   
