@@ -66,6 +66,31 @@ fn_pred_err <- function(test_pred, y) {
   return(test_pred_err)
 }
 
+#Obtener las hipotesis mas bajas para usarlas en CV se inicializa firstErr=3
+fn_order_error <- function(listError, firstErr=3)
+{
+  auxError <- list()
+  iteration <- 1
+  
+  for (i in seq(length(listError))) {
+    for (j in seq(length(listError[[i]]))) {
+      auxError[[iteration]] <- c(error = listError[[i]][j],control = i,umbral = j)
+      iteration <- iteration + 1
+    }
+  }
+  
+  df <- as.data.frame(t(as.data.frame(auxError)))
+  
+  #Order los resultados
+  df.order <- arrange(df, df$error)
+  
+  #Obtener los firstErr=2 primeros
+  df.out <- df.order[1:firstErr,]
+  
+  
+  list(dfError=df.out,firstErr = firstErr)
+  
+}
 
 # particion train-test
 partition_train_test <- function(df, ntrain = 100) {
@@ -296,9 +321,9 @@ gbm_cv_err <- function(cv_part, formula, ctrl, umbral = 0.5, var_y) {
   return(mean(unlist(cv_err)))
 }
 
-
-#  ************** Rpart  **************
-
+#######################################################################
+##################       Rpart                       ##################
+#######################################################################
 # Clasificacion con rpart para una lista de formulas
 rpart_fit_formulas <- function(train, formulas, method = 'class') {
   list_fit <- list()
@@ -322,6 +347,7 @@ rpart_fit_ctrl <- function(train, formula, ctrl, method = 'class') {
   return(list_fit)
 }
 
+
 rpart_prob <- function(list_fit, newdata) {
   # list_fit: lista retornada por rpart_fit_ctrl || rpart_fit_formulas
   # newdata: datos de test
@@ -334,9 +360,6 @@ rpart_prob <- function(list_fit, newdata) {
   }
   return(test_prob)
 }
-
-
-
 
 
 # Plot de lista de arboles
@@ -358,6 +381,7 @@ rpart_pred_err <- function(list_fit, newdata, y) {
   }
   list(pred = test_pred, err = test_err)
 }
+
 
 # Prediccion y error de cv con rpart
 # Error de CV
@@ -389,15 +413,31 @@ rpart_cv_err <- function(cv_part, formula, ctrl, umbral = 0.5, var_y) {
 }
 
 
-# rpart_cv_err <- function(cv_part, formula, ctrl, y) {
-#   cv_test <- cv_part$test
-#   cv_train <- cv_part$train
-#   cv_matrix_err <- matrix(0, nrow = cv_part$k_folds, ncol = length(ctrl))
-#   for (k in seq(1, cv_part$k_folds)) {
-#     list_fit <- rpart_fit_ctrl(cv_train[[k]], 
-#                                formula = formula, ctrl = ctrl)
-#     list_pred_err <- rpart_pred_err(list_fit, newdata = cv_test[[k]], y = y)
-#     cv_matrix_err[k, ] <- list_pred_err$err  
-#   }
-#   apply(cv_matrix_err, 2, mean)
-# }
+
+#Ejecuta el CV para las primeras mejores resultados
+rpartCVAutomatic <- function(cv_part, formula, ctrl, umbral, var_y)
+{
+  result <- list()
+  for (i in seq(nrow(h.first$dfError))) {
+    h.rpart_cv_ctrl_1 <- list(h1 = h.rpart_ctrl[[h.first$dfError$control[i]]])
+    h.rpart_cv_umbral_1 <- h.umbral[h.first$dfError$umbral[i]]
+    
+    #cv_part, formula, ctrl, y
+    h.rpart_cv_err_1 <- rpart_cv_err(cv_part = h.cv_part, 
+                                     formula = h.formula, 
+                                     ctrl = h.rpart_cv_ctrl_1, 
+                                     umbral = h.rpart_cv_umbral_1,
+                                     var_y = 'Churn') 
+    
+    
+    result[[i]] <- c(mensaje = paste('Error h1 -', 
+                                     'umbral:', h.rpart_cv_umbral_1, 
+                                     'test:', h.first$dfError$error[i], 
+                                     'cv:', h.rpart_cv_err_1),
+                     errorTest = h.first$dfError$error[i],
+                     errorCV = h.rpart_cv_err_1
+    )
+  }
+  
+  return(result) 
+}
