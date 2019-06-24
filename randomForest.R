@@ -72,65 +72,82 @@
                                         h.test$Churn)
   
   #Plot del error en RamdomForest
-  plot_umbral_err(h.randomForest_predErr, main = 'Error (Random Forest)', umbral = h.umbral)
+  plot_umbral_err(h.randomForest_predErr,
+                  main = 'Error (Random Forest)',
+                  umbral = h.umbral)
   
   
   #Mejores resueltados para cada kipotesis
-
+  h.firstErr = 1
+  h.first <- fn_order_error(listError = h.randomForest_predErr,
+                            firstErr = h.firstErr)
+  
+  View(h.first$dfError)
   
   
-  # Cross Validation
-  # Control 3 con umbral 0.38
-  h.rf_test_err_1 <- h.randomForest_predErr[[3]][4]
-  h.rf_cv_ctrl_1 <- list(h1 = h.rf_ctrl[[3]])
-  h.rf_cv_umbral_1 <- h.umbral[4]
-  h.rf_cv_err_1 <- rf_cv_err(h.cv_part, 
-                             formula = h.formula, 
-                             ctrl = h.rf_cv_ctrl_1, 
-                             umbral = h.rf_cv_umbral_1,
-                             var_y = 'Churn') 
-  print(paste('Error h1 -', 
-              'umbral:', h.rf_cv_umbral_1, 
-              'test:', h.rf_test_err_1, 
-              'cv:', h.rf_cv_err_1))
+  #Ejecución de las CV con los mejores errores
+  h.rf_cv_automatic <- rfCVAutomatic(firstError = h.first,
+                                       cv_part = h.cv_part, 
+                                       formula = h.formula, 
+                                       ctrl = h.gbm_ctrl, 
+                                       umbral = h.umbral,
+                                       var_y = 'Churn')
   
-  # Control 5 con umbral 0.38
-  h.rf_test_err_2 <- h.randomForest_predErr[[5]][4]
-  h.rf_cv_ctrl_2 <- list(h2 = h.rf_ctrl[[5]])
-  h.rf_cv_umbral_2 <- h.umbral[4]
-  h.rf_cv_err_2 <- rf_cv_err(h.cv_part, 
-                             formula = h.formula, 
-                             ctrl = h.rf_cv_ctrl_2, 
-                             umbral = h.rf_cv_umbral_2,
-                             var_y = 'Churn')
-  print(paste('Error h2 -', 
-              'umbral:', h.rf_cv_umbral_2, 
-              'test:', h.rf_test_err_2, 
-              'cv:', h.rf_cv_err_2))
+  print(h.rf_cv_automatic)
   
   
-  print('Generacion de la prediccion sobre test sample')
-  
-  
-  
-  
-  h.test_sample <- read.csv('data/test_sample.csv')
-  h.CustomerID <- h.test_sample$CustomerID
-  h.test_sample$CustomerID <- NULL
-  h.test_sample$ServiceArea <- NULL
-  
-  h.hip_prob <- ... # calcular la probabilidad de la hipotesis seleccionada sobre test_sample
-  h.hip_pred <- ... # calcular la prediccion para el umbral seleccionado
-  h.Churn <- as.logical(h.hip_pred[[1]][[1]]) # convertir 1->TRUE / 0->FALSE
-  
-  print('Generar salida')
-  
-  h.output <- data.frame(CustomerID = h.CustomerID, 
-                         Churn = h.Churn)
-  write.csv(h.output, 
-            file = "test_sample_pred.csv", 
-            row.names = FALSE)
-  
-  print('Done')
-  
+  # # Cross Validation
+  # # Control 3 con umbral 0.38
+  # h.rf_test_err_1 <- h.randomForest_predErr[[3]][4]
+  # h.rf_cv_ctrl_1 <- list(h1 = h.rf_ctrl[[3]])
+  # h.rf_cv_umbral_1 <- h.umbral[4]
+  # h.rf_cv_err_1 <- rf_cv_err(h.cv_part, 
+  #                            formula = h.formula, 
+  #                            ctrl = h.rf_cv_ctrl_1, 
+  #                            umbral = h.rf_cv_umbral_1,
+  #                            var_y = 'Churn') 
+  # print(paste('Error h1 -', 
+  #             'umbral:', h.rf_cv_umbral_1, 
+  #             'test:', h.rf_test_err_1, 
+  #             'cv:', h.rf_cv_err_1))
+  # 
+  # # Control 5 con umbral 0.38
+  # h.rf_test_err_2 <- h.randomForest_predErr[[5]][4]
+  # h.rf_cv_ctrl_2 <- list(h2 = h.rf_ctrl[[5]])
+  # h.rf_cv_umbral_2 <- h.umbral[4]
+  # h.rf_cv_err_2 <- rf_cv_err(h.cv_part, 
+  #                            formula = h.formula, 
+  #                            ctrl = h.rf_cv_ctrl_2, 
+  #                            umbral = h.rf_cv_umbral_2,
+  #                            var_y = 'Churn')
+  # print(paste('Error h2 -', 
+  #             'umbral:', h.rf_cv_umbral_2, 
+  #             'test:', h.rf_test_err_2, 
+  #             'cv:', h.rf_cv_err_2))
+  # 
+  # 
+  # print('Generacion de la prediccion sobre test sample')
+  # 
+  # 
+  # 
+  # 
+  # h.test_sample <- read.csv('data/test_sample.csv')
+  # h.CustomerID <- h.test_sample$CustomerID
+  # h.test_sample$CustomerID <- NULL
+  # h.test_sample$ServiceArea <- NULL
+  # 
+  # h.hip_prob <- ... # calcular la probabilidad de la hipotesis seleccionada sobre test_sample
+  # h.hip_pred <- ... # calcular la prediccion para el umbral seleccionado
+  # h.Churn <- as.logical(h.hip_pred[[1]][[1]]) # convertir 1->TRUE / 0->FALSE
+  # 
+  # print('Generar salida')
+  # 
+  # h.output <- data.frame(CustomerID = h.CustomerID, 
+  #                        Churn = h.Churn)
+  # write.csv(h.output, 
+  #           file = "test_sample_pred.csv", 
+  #           row.names = FALSE)
+  # 
+  # print('Done')
+  # 
  
