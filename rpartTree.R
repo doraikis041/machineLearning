@@ -57,12 +57,14 @@
   
   
   #Mejores resueltados para cada kipotesis
-  h.firstErr = 2
+  h.iniErr = 1
+  h.lastErr = 3
   h.first <- fn_order_error(listError = h.rpart_pred_err,
-                            firstErr = h.firstErr)
+                            iniErr = h.iniErr, 
+                            lastErr= h.lastErr)
   
   #Ejecución de las CV con los mejores errores
-  rpartCVAutomatic.r <- rpartCVAutomatic(h.first = firstResult,
+  rpartCVAutomatic.r <- rpartCVAutomatic(h.first = h.first,
                                          cv_part = h.cv_part, 
                                          formula = h.formula, 
                                          ctrl = h.rpart_ctrl, 
@@ -70,32 +72,32 @@
                                          var_y = 'Churn')
   
   
-  print('Generacion de la prediccion sobre test sample')
-  
-  h.test_sample <- read.csv('Dataset/test_sample.csv')
-  h.CustomerID <- h.test_sample$CustomerID
-  h.test_sample$CustomerID <- NULL
-  h.test_sample$ServiceArea <- NULL
-  h.hip_fit <- list(h.rpart_fit[[4]])
-  h.hip_umbral <- c(h.umbral[4])
-
-  # calcular la probabilidad de la hipotesis seleccionada sobre test_sample
-  h.hip_prob <- rpart_prob(list_fit = h.hip_fit
-                          ,newdata = h.test_sample)
-
-  # calcular la prediccion para el umbral seleccionado
-  h.hip_pred <- fn_pred(test_prob = h.hip_prob
-                        ,umbral = h.hip_umbral)
-  
-  h.Churn <- as.logical(h.hip_pred[[1]][[1]]) # convertir 1->TRUE / 0->FALSE
-
-  print('Generar salida')
-
-  h.output <- data.frame(CustomerID = h.CustomerID,
-                         Churn = h.Churn)
-  write.csv(h.output,
-            file = "test_sample_pred.csv",
-            row.names = FALSE)
+  # print('Generacion de la prediccion sobre test sample')
+  # 
+  # h.test_sample <- read.csv('Dataset/test_sample.csv')
+  # h.CustomerID <- h.test_sample$CustomerID
+  # h.test_sample$CustomerID <- NULL
+  # h.test_sample$ServiceArea <- NULL
+  # h.hip_fit <- list(h.rpart_fit[[4]])
+  # h.hip_umbral <- c(h.umbral[4])
+  # 
+  # # calcular la probabilidad de la hipotesis seleccionada sobre test_sample
+  # h.hip_prob <- rpart_prob(list_fit = h.hip_fit
+  #                         ,newdata = h.test_sample)
+  # 
+  # # calcular la prediccion para el umbral seleccionado
+  # h.hip_pred <- fn_pred(test_prob = h.hip_prob
+  #                       ,umbral = h.hip_umbral)
+  # 
+  # h.Churn <- as.logical(h.hip_pred[[1]][[1]]) # convertir 1->TRUE / 0->FALSE
+  # 
+  # print('Generar salida')
+  # 
+  # h.output <- data.frame(CustomerID = h.CustomerID,
+  #                        Churn = h.Churn)
+  # write.csv(h.output,
+  #           file = "test_sample_pred_Rpart.csv",
+  #           row.names = FALSE)
 
   print('Done')
 
