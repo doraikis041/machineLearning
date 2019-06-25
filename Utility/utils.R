@@ -1,4 +1,3 @@
-
 #Librerias Principales
 library(class)
 library(e1071)
@@ -27,7 +26,7 @@ loadData <- function()
   df <- na.omit(T0)
 }
 
-## Solo para RF
+## Solo para RandomForest
 loadDataRF <- function()
 {
   T0 <- read.csv(file = "Dataset/dataset.csv")
@@ -102,11 +101,21 @@ fn_order_error <- function(listError,iniErr = 1, lastErr=3)
   
 }
 
-# particion train-test
+## Creación de la particion train-test
 partition_train_test <- function(df, ntrain = 100) {
   train_idx <- sample.int(nrow(df), size = ntrain)
   list(train = df[train_idx,], test = df[-train_idx,])
 }
+
+## Creación de la particion train-test solo numeric conviertiendo Churn a númerico antes
+partition_train_test_numeric <- function(df, ntrain = 10) {
+  df$Churn <- as.numeric(df$Churn)
+  df_numeric <- which(sapply(df,is.numeric))
+  dfN <- df[,df_numeric]
+  train_idx <- sample.int(nrow(dfN), size = ntrain)
+  list(train = dfN[train_idx,], test = dfN[-train_idx,])
+}
+
 
 # Particion en 5 folds
 partition_cv <- function(df, k_folds = 5) {
@@ -504,4 +513,73 @@ rpartCVAutomatic <- function(firstError, cv_part, formula, ctrl, umbral, var_y)
   }
   
   return(result) 
+}
+
+
+##################################################################################################
+#####################        Regresion Logistica GLM             #################################
+##################################################################################################
+glm_fit_formulas <- function(train, formulas) {
+  list_fit <- list()
+  for (i in seq(1, length(formulas))) {
+    list_fit[[i]] <- glm(as.formula(formulas[i]), data = train, family = 'binomial')
+  }
+  return(list_fit)
+}
+
+
+# Prediccion y error 
+glm_pred_err <- function(list_fit, newdata, y, umbral =0.5) {
+  test_prob <- list()
+  test_pred <- list()
+  test_err <- rep(0, length(list_fit))
+  for (i in seq(1, length(list_fit))) {
+    # probabilidad
+    test_prob[[i]] <- predict(list_fit[[i]], newdata = newdata, type = 'response') #para que de la probabilidad
+    # prediccion
+    test_pred[[i]] <- ifelse(test_prob[[i]] > umbral,1,0)
+    # error de clasificacion
+    test_err[i] <- fn_err(test_pred[[i]], newdata[[y]])
+  }
+  list(prob = test_prob, pred = test_pred, err = test_err)
+}
+
+
+# Prediccion y matriz de confusión  
+glm_pred_err_mc <- function(list_fit, newdata, y) {
+  test_prob <- list()
+  test_pred <- list()
+  test_err  <- list ()
+  test_mc <- list()
+  for (i in seq(1, length(list_fit))) {
+    # probabilidad
+    test_prob[[i]] <- predict(list_fit[[i]], newdata = newdata, type = 'response') #para que de la probabilidad
+    # prediccion 
+    umbral <- seq(0.3, to = 0.7, by = 0.1)
+    test_err[[i]] <- rep(0, length(umbral))
+    test_pred[[i]] <- list ()
+    test_mc[[i]] <- list ()
+    for (j in seq(1, length(umbral))) {
+      # prediccion 
+      test_pred[[i]][[j]] <- ifelse(test_prob[[i]] > umbral[j],1,0)
+      # error 
+      test_err[[i]][j] <- fn_err(test_pred[[i]][[j]], newdata[[y]])
+      # mc 
+      test_mc[[i]][[j]] <- table(test_pred[[i]][[j]],newdata[[y]])
+    }
+  }
+  list(prob = test_prob, pred = test_pred, err = test_err, mc = test_mc)
+}
+
+# Prediccion y error MSE
+cv_err <- function(cv_part, formulas, y) {
+  cv_test <- cv_part$test
+  cv_train <- cv_part$train
+  cv_matrix_err <- matrix(0, nrow = cv_part$k_folds, ncol = length(formulas))
+  for (k in seq(1, cv_part$k_folds)) {
+    list_fit <- glm_fit_formulas(cv_train[[k]], formulas = formulas)
+    list_pred_err <- glm_pred_err_cla(list_fit, newdata = cv_test[[k]], y = y)
+    cv_matrix_err[k, ] <- list_pred_err$err  
+  }
+  apply(cv_matrix_err, 2, mean)
 }
