@@ -30,6 +30,14 @@ loadData <- function()
   df <- na.omit(T0)
 }
 
+loadDataYN <- function()
+{
+  T0 <- read.csv(file = "Dataset/dataset.csv")
+  T0$CustomerID <- NULL
+  T0$ServiceArea <- NULL
+  df <- na.omit(T0)
+}
+
 ## Calculo del Error de clasificación
 fn_err_cla <- function(yhat, y) { mean(yhat != y) }
 
@@ -53,10 +61,11 @@ partition_train_test <- function(df, ntrain = 10) {
 
 ## Creación de la particion train-test solo numeric
 partition_train_test_numeric <- function(df, ntrain = 10) {
+  df$Churn <- as.numeric(df$Churn)
   df_numeric <- which(sapply(df,is.numeric))
-  df <- df[,df_numeric]
-  train_idx <- sample.int(nrow(df), size = ntrain)
-  list(train = df[train_idx,], test = df[-train_idx,])
+  dfN <- df[,df_numeric]
+  train_idx <- sample.int(nrow(dfN), size = ntrain)
+  list(train = dfN[train_idx,], test = dfN[-train_idx,])
 }
 
 
@@ -87,7 +96,6 @@ glm_fit_formulas_cla <- function(train, formulas) {
 
 
 # Prediccion y error 
-
 glm_pred_err_cla <- function(list_fit, newdata, y, umbral =0.5) {
   test_prob <- list()
   test_pred <- list()
@@ -136,8 +144,8 @@ cv_err <- function(cv_part, formulas, y) {
   cv_train <- cv_part$train
   cv_matrix_err <- matrix(0, nrow = cv_part$k_folds, ncol = length(formulas))
   for (k in seq(1, cv_part$k_folds)) {
-    list_fit <- glm_fit_formulas(cv_train[[k]], formulas = formulas)
-    list_pred_err <- glm_pred_err(list_fit, newdata = cv_test[[k]], y = y)
+    list_fit <- glm_fit_formulas_cla(cv_train[[k]], formulas = formulas)
+    list_pred_err <- glm_pred_err_cla(list_fit, newdata = cv_test[[k]], y = y)
     cv_matrix_err[k, ] <- list_pred_err$err  
   }
   apply(cv_matrix_err, 2, mean)
@@ -421,3 +429,21 @@ gbm_cv_err <- function(cv_part, formula, ctrl, umbral = 0.5, var_y) {
   return(mean(unlist(cv_err)))
 }
 
+
+#Knn
+knn_cv_err <- function(cv_part, cl, vars, k) {
+  cv_err <- rep(0, cv_part$k_folds)
+  cv_list_erro <- list()
+  for (i in seq(k))
+  {
+    for (s in seq(1, cv_part$k_folds)) {
+      cv_train <- cv_part$train[[s]][, vars]
+      cv_test <- cv_part$test[[s]][, vars]
+      cv_knn_class <- cv_part$train[[s]][[cl]]
+      cv_pred <- knn(cv_train , cv_test , cl = cv_knn_class , k = i)
+      cv_err[s] <- fn_err(cv_pred, cv_part$test[[s]][[cl]])
+    }
+    cv_list_erro[[i]] <- mean(cv_err)
+  }
+  return(cv_list_erro)
+}

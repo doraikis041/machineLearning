@@ -9,8 +9,8 @@ h.train <- h.data$train
 h.test <- h.data$test
 vars <- names(h.train) 
 
-# h.train1 <- h.train[,-h.train$Churn]
-# h.test1 <- h.test[,-h.test$Churn]
+h.train$Churn <- NULL
+h.test$Churn <- NULL
 
 h.k <- 50
 h.A <- function(k, train, test, y) {knn(train, test, cl = as.factor(y), k)}
