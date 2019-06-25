@@ -1,78 +1,61 @@
-source("Utility/functions.R")
-
-
-# Cargar datos
-raw_data <- loadData()
-
-h.data <- partition_train_test_numeric (raw_data, nTrain)
-h.train <- h.data$train
-h.test <- h.data$test
-vars <- names(h.train) 
-
-h.train$Churn <- NULL
-h.test$Churn <- NULL
-
-h.k <- 50
-h.A <- function(k, train, test, y) {knn(train, test, cl = as.factor(y), k)}
-h.t_predTest <- list()
-for (k in seq(h.k)) {
-  h.t_predTest[[k]] <- h.A(k, h.train, h.test, y = h.train$Churn)
-  }
-
-print(h.t_predTest)
-
-
-# error de knn
-knn_pred_err_cla <- function (list_pred, newdata, y, k) {
-test_err <- rep (0, length(k))
-for (i in seq(k)) {
-  test_err[i] <- fn_err(list_pred[[i]], newdata[[y]])
-}
-list(err = test_err, k = k)
-}
-
-h.error_knn <- knn_pred_err_cla(list_pred = h.t_predTest, newdata = h.test, y = 'Churn', k= h.k)
-print(h.error_knn)
-
-
-# error CV 
-h.cv <- partition_cv(df = h.train) 
-
-
-knn_cv_err <- function(cv_part, cl, vars, k) {
-  cv_err <- rep(0, cv_part$k_folds)
-  cv_list_erro <- list()
-  for (i in seq(k))
-    {
-    for (s in seq(1, cv_part$k_folds)) {
-      cv_train <- cv_part$train[[s]][, vars]
-      cv_test <- cv_part$test[[s]][, vars]
-      cv_knn_class <- cv_part$train[[s]][[cl]]
-      cv_pred <- knn(cv_train , cv_test , cl = cv_knn_class , k = i)
-      cv_err[s] <- fn_err(cv_pred, cv_part$test[[s]][[cl]])
-    }
-    cv_list_erro[[i]] <- mean(cv_err)
-  }
-  return(cv_list_erro)
-}
-
-h.CV_err <- knn_cv_err(cv_part = h.cv, cl = "Churn", vars = vars, k = h.k)
-
-
-
-
-ejex <- c(1:50)
-ejex1 <- rev(ejex)/50
-ejey_bayes_errors <- c(rep(bayes_errorT0,50))
-
-
-plot(ejex1, h.error_knn$err, type = 'l', ylim = c(-1, 0),
-     col = 'red', xaxt = "n", main = 'error_Test_CV', xlab = "complexity", ylab = "error")
-axis(1,ejex1, labels = ejex1)
-lines(ejex1, h.CV_err, col = 'green')
-legend("bottomleft", cex = 0.5,
-       legend = c("eTest", "eCV"), 
-       col = c("red", "green"),
-       lty = rep(1, length(h.error_knn)))
-
-
+  source("Utility/utils.R")
+  
+  #Se carga los datos con las ETL generales
+  h.data <- loadData()
+  
+  #Generar la particion de test & train
+  h.ntrain <- nTrain
+  h.part <- partition_train_test_numeric(h.data, ntrain = h.ntrain)
+  h.train <- h.part$train
+  h.test <- h.part$test
+  
+  # Particion para cross validation
+  h.cv_part <- partition_cv(df = h.train)
+  
+  #Variables
+  h.k <- 2
+  h.vars <- names(h.train)
+  
+  #Se elemina variable a predecir del data set de train y test
+  #h.train$Churn <- NULL
+  #h.test$Churn <- NULL
+  
+  # Formulas
+  h.formula <- 'as.factor(Churn) ~ .'
+  fn_err <- fn_err_cost #fn_err_cla
+  
+  #Predicción (k, train, test, y)
+  h.knn_pred <- knn_pred(k = h.k,
+                         train = h.train,
+                         test = h.test,
+                         y = h.train$Churn)
+  
+  # Error de predicción en knn
+  h.error_knn <- knn_pred_err(list_pred = h.knn_pred,
+                              newdata = h.test,
+                              y = 'Churn',
+                              k= h.k)
+  #Imprimo resueltdo
+  print(h.error_knn)
+  
+  
+  # error CV 
+  h.CV_err <- knn_cv_err(cv_part = h.cv_part,
+                         cl = "Churn",
+                         vars = h.vars,
+                         k = h.k)
+  
+  
+  
+  #Plot del error en Knn para test y para CV
+  ejex <- rev(c(1:h.k))/h.k
+  plot(ejex, h.error_knn$err, type = 'l', ylim = c(-1, 0),
+       col = 'red', xaxt = "n", main = 'error_Test_CV', xlab = "complexity", ylab = "error")
+  axis(1,ejex, labels = ejex)
+  lines(ejex, h.CV_err, col = 'green')
+  legend("bottomleft", cex = 0.5,
+         legend = c("eTest", "eCV"), 
+         col = c("red", "green"),
+         lty = rep(1, length(h.CV_err)))
+  
+  
