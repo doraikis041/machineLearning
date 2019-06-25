@@ -4,7 +4,7 @@
   h.umbral <- seq(0.32, to = 0.42, by = 0.01)
   
   #Se carga los datos con las ETL generales
-  h.data <- loadData()
+  h.data <- loadDataRF()
   
   #Generar la particion de test & train
   h.ntrain <- nTrain
@@ -21,30 +21,30 @@
   fn_err <- fn_err_cost #fn_err_cla
   
   #Definir el valor de mtry y ntree
-  h.rf_ctrl <- list(ctrl1 = list(ntree = 500, mtry = 5)
-                    ,ctrl2 = list(ntree = 500, mtry = 6)
-                    ,ctrl3 = list(ntree = 500, mtry = 7)
-                    ,ctrl4 = list(ntree = 500, mtry = 8)
-                    ,ctrl5 = list(ntree = 525, mtry = 5)
-                    ,ctrl6 = list(ntree = 525, mtry = 6)
-                    ,ctrl7 = list(ntree = 525, mtry = 7)
-                    ,ctrl8 = list(ntree = 525, mtry = 8)
-                    ,ctrl9 = list(ntree = 550, mtry = 5)
-                    ,ctrl10 = list(ntree = 550, mtry = 6)
-                    ,ctrl11 = list(ntree = 550, mtry = 7)
-                    ,ctrl12 = list(ntree = 550, mtry = 8)
-                    ,ctrl13 = list(ntree = 575, mtry = 5)
-                    ,ctrl14 = list(ntree = 575, mtry = 6)
-                    ,ctrl15 = list(ntree = 575, mtry = 7)
-                    ,ctrl16 = list(ntree = 575, mtry = 8)
-                    ,ctrl17 = list(ntree = 600, mtry = 5)
-                    ,ctrl18 = list(ntree = 600, mtry = 6)
-                    ,ctrl19 = list(ntree = 600, mtry = 7)
-                    ,ctrl20 = list(ntree = 600, mtry = 8)
-                    ,ctrl21 = list(ntree = 625, mtry = 5)
-                    ,ctrl22 = list(ntree = 625, mtry = 6)
-                    ,ctrl23 = list(ntree = 625, mtry = 7)
-                    ,ctrl24 = list(ntree = 625, mtry = 8)  
+  h.rf_ctrl <- list(ctrl1 = list(ntree = 500, mtry = 6)
+                    ,ctrl2 = list(ntree = 500, mtry = 7)
+                    # ,ctrl3 = list(ntree = 500, mtry = 7)
+                    # ,ctrl4 = list(ntree = 500, mtry = 8)
+                    # ,ctrl5 = list(ntree = 525, mtry = 5)
+                    # ,ctrl6 = list(ntree = 525, mtry = 6)
+                    # ,ctrl7 = list(ntree = 525, mtry = 7)
+                    # ,ctrl8 = list(ntree = 525, mtry = 8)
+                    # ,ctrl9 = list(ntree = 550, mtry = 5)
+                    # ,ctrl10 = list(ntree = 550, mtry = 6)
+                    # ,ctrl11 = list(ntree = 550, mtry = 7)
+                    # ,ctrl12 = list(ntree = 550, mtry = 8)
+                    # ,ctrl13 = list(ntree = 575, mtry = 5)
+                    # ,ctrl14 = list(ntree = 575, mtry = 6)
+                    # ,ctrl15 = list(ntree = 575, mtry = 7)
+                    # ,ctrl16 = list(ntree = 575, mtry = 8)
+                    # ,ctrl17 = list(ntree = 600, mtry = 5)
+                    # ,ctrl18 = list(ntree = 600, mtry = 6)
+                    # ,ctrl19 = list(ntree = 600, mtry = 7)
+                    # ,ctrl20 = list(ntree = 600, mtry = 8)
+                    # ,ctrl21 = list(ntree = 625, mtry = 5)
+                    # ,ctrl22 = list(ntree = 625, mtry = 6)
+                    # ,ctrl23 = list(ntree = 625, mtry = 7)
+                    # ,ctrl24 = list(ntree = 625, mtry = 8)  
                     
   )
   
@@ -55,10 +55,6 @@
                                     h.rf_ctrl)
   
 
-  # Importancia de las variables para el primer control
-  # importance(h.randomForest_fit[[1]])
-  # varImpPlot(h.randomForest_fit[[1]])
-  
   #Probabilidad en test
   h.randomForest_prob <- rf_prob(h.randomForest_fit,
                                  h.test)
@@ -78,18 +74,17 @@
   
   
   #Mejores resueltados para cada kipotesis
-  h.firstErr = 1
+  h.iniErr = 1
+  h.lastErr = 3
   h.first <- fn_order_error(listError = h.randomForest_predErr,
-                            firstErr = h.firstErr)
-  
-  View(h.first$dfError)
-  
-  
+                            iniErr = h.iniErr,
+                            lastErr = h.lastErr)
+
   #Ejecución de las CV con los mejores errores
   h.rf_cv_automatic <- rfCVAutomatic(firstError = h.first,
                                        cv_part = h.cv_part, 
                                        formula = h.formula, 
-                                       ctrl = h.gbm_ctrl, 
+                                       ctrl = h.rf_ctrl, 
                                        umbral = h.umbral,
                                        var_y = 'Churn')
   

@@ -1,7 +1,7 @@
   source("Utility/utils.R")
   
   #Vector de umbrales para la predición
-  h.umbral <- seq(0.30, to = 0.42, by = 0.01)
+  h.umbral <- seq(0.32, to = 0.42, by = 0.01)
   
   #Se carga los datos con las ETL generales
   h.data <- loadData()
@@ -20,18 +20,18 @@
   h.formula <- 'Churn ~ .'
   fn_err <- fn_err_cost #fn_err_cla
   
-  h.gbm_ctrl <- list(ctrl1 = list(ntree = 600, depth = 20, shrinkage = 0.01)
-                     ,ctrl2 = list(ntree = 600, depth = 25, shrinkage = 0.01)
-                     ,ctrl3 = list(ntree = 600, depth = 30, shrinkage = 0.01)
-                     ,ctrl4 = list(ntree = 625, depth = 20, shrinkage = 0.01)
-                     ,ctrl5 = list(ntree = 625, depth = 25, shrinkage = 0.01)
-                     ,ctrl6 = list(ntree = 625, depth = 30, shrinkage = 0.01)
-                     ,ctrl7 = list(ntree = 650, depth = 20, shrinkage = 0.01)
-                     ,ctrl8 = list(ntree = 650, depth = 25, shrinkage = 0.01)
-                     ,ctrl9 = list(ntree = 650, depth = 30, shrinkage = 0.01)
-                     ,ctrl10 = list(ntree = 675, depth = 20, shrinkage = 0.01)
-                     ,ctrl11 = list(ntree = 675, depth = 25, shrinkage = 0.01)
-                     ,ctrl12 = list(ntree = 675, depth = 30, shrinkage = 0.01)
+  h.gbm_ctrl <- list(ctrl1 = list(ntree = 600, depth = 2, shrinkage = 0.1)
+                     ,ctrl2 = list(ntree = 600, depth = 3, shrinkage = 0.1)
+                     ,ctrl3 = list(ntree = 600, depth = 4, shrinkage = 0.1)
+                     # ,ctrl4 = list(ntree = 400, depth = 2, shrinkage = 0.01)
+                     # ,ctrl5 = list(ntree = 400, depth = 3, shrinkage = 0.01)
+                     # ,ctrl6 = list(ntree = 400, depth = 4, shrinkage = 0.01)
+                     # ,ctrl7 = list(ntree = 400, depth = 2, shrinkage = 0.04)
+                     # ,ctrl8 = list(ntree = 400, depth = 3, shrinkage = 0.04)
+                     # ,ctrl9 = list(ntree = 400, depth = 4, shrinkage = 0.04)
+                     # ,ctrl10 = list(ntree = 400, depth = 2, shrinkage = 0.07)
+                     # ,ctrl11 = list(ntree = 400, depth = 3, shrinkage = 0.07)
+                     # ,ctrl12 = list(ntree = 400, depth = 4, shrinkage = 0.07)
                      
   )
   
@@ -59,13 +59,12 @@
                   umbral = h.umbral)
   
   #Mejores resueltados para cada kipotesis
-  h.firstErr = 5
+  h.iniErr = 1
+  h.lastErr = 3
   h.first <- fn_order_error(listError = h.gbm_test_pred_err,
-                            firstErr = h.firstErr)
-  
-  View(h.first$dfError)
-  
-  
+                            iniErr = h.iniErr, 
+                            lastErr= h.lastErr)
+
   #Ejecución de las CV con los mejores errores
   h.gbm_cv_automatic <- gbmCVAutomatic(firstError = h.first,
                                          cv_part = h.cv_part, 
@@ -83,6 +82,7 @@
   # h.CustomerID <- h.test_sample$CustomerID
   # h.test_sample$CustomerID <- NULL
   # h.test_sample$ServiceArea <- NULL
+  #
   # h.hip_fit <- list(h.gbm_fit[[4]])
   # h.hip_umbral <- c(h.umbral[3])
   # h.hip_ctrl <- list(h.gbm_ctrl[[4]])

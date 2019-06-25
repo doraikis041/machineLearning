@@ -27,13 +27,24 @@ loadData <- function()
   df <- na.omit(T0)
 }
 
+## Solo para RF
+loadDataRF <- function()
+{
+  T0 <- read.csv(file = "Dataset/dataset.csv")
+  T0$CustomerID <- NULL
+  T0$ServiceArea <- NULL
+  T0$Churn <- ifelse(T0$Churn == 'Yes',1,0)
+  df <- na.roughfix(T0)
+}
+
+
 #Error de clasificacion
 fn_err_cla <- function(yhat, y) { mean(yhat != y) }
 
 # costo
 fn_err_cost <- function(yhat, y) { 
-  fp_cost <- 20 * sum( yhat == 1 & y == 0 )
-  tp_cost <- -35 * sum( yhat == 1 & y == 1 )
+  fp_cost <- 10 * sum( yhat == 1 & y == 0 )
+  tp_cost <- -25.5 * sum( yhat == 1 & y == 1 )
   return((fp_cost + tp_cost) / length(y)) 
 }
 
@@ -67,16 +78,15 @@ fn_pred_err <- function(test_pred, y) {
 }
 
 #Obtener las hipotesis mas bajas para usarlas en CV se inicializa firstErr=3
-fn_order_error <- function(listError, firstErr=3)
+fn_order_error <- function(listError,iniErr = 1, lastErr=3)
 {
   auxError <- list()
-  iteration <- 1
-  
-  for (i in seq(length(listError))) {
-    for (j in seq(length(listError[[i]]))) {
-      auxError[[iteration]] <- c(error = listError[[i]][j],control = i,umbral = j)
-      iteration <- iteration + 1
-    }
+
+    for (i in seq(length(listError))) {
+    auxError[[i]] <- c(error = min(listError[[i]]),
+                       control = i,
+                       umbral = match(min(listError[[i]]),listError[[i]]))
+    
   }
   
   df <- as.data.frame(t(as.data.frame(auxError)))
@@ -85,10 +95,10 @@ fn_order_error <- function(listError, firstErr=3)
   df.order <- arrange(df, df$error)
   
   #Obtener los firstErr=2 primeros
-  df.out <- df.order[1:firstErr,]
+  df.out <- df.order[iniErr:lastErr,]
   
   
-  list(dfError=df.out,firstErr = firstErr)
+  list(dfError=df.out,iniErr = iniErr, lastErr = lastErr)
   
 }
 
