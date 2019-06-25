@@ -104,7 +104,7 @@
   # h.output <- data.frame(CustomerID = h.CustomerID,
   #                        Churn = h.Churn)
   # write.csv(h.output,
-  #           file = "test_sample_pred2.csv",
+  #           file = "test_sample_pred_GBM.csv",
   #           row.names = FALSE)
   # 
   # print('Done')
