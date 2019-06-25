@@ -12,7 +12,7 @@ vars <- names(h.train)
 # h.train1 <- h.train[,-h.train$Churn]
 # h.test1 <- h.test[,-h.test$Churn]
 
-h.k <- 2
+h.k <- 50
 h.A <- function(k, train, test, y) {knn(train, test, cl = as.factor(y), k)}
 h.t_predTest <- list()
 for (k in seq(h.k)) {
@@ -58,11 +58,21 @@ knn_cv_err <- function(cv_part, cl, vars, k) {
 
 h.CV_err <- knn_cv_err(cv_part = h.cv, cl = "Churn", vars = vars, k = h.k)
 
-#h.knn_cv
-
-#h.CV_err <- cv_err_knn(cv_part = h.cv, y = h.cv_con_Churn, k= h.k) 
 
 
 
+ejex <- c(1:50)
+ejex1 <- rev(ejex)/50
+ejey_bayes_errors <- c(rep(bayes_errorT0,50))
+
+
+plot(ejex1, h.error_knn$err, type = 'l', ylim = c(-1, 0),
+     col = 'red', xaxt = "n", main = 'error_Test_CV', xlab = "complexity", ylab = "error")
+axis(1,ejex1, labels = ejex1)
+lines(ejex1, h.CV_err, col = 'green')
+legend("bottomleft", cex = 0.5,
+       legend = c("eTest", "eCV"), 
+       col = c("red", "green"),
+       lty = rep(1, length(h.error_knn)))
 
 
