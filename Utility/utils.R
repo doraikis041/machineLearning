@@ -139,9 +139,9 @@
       indxMin[i] <- min(unlist(list_err[[i]]))
     }
     indexMin <- as.numeric(which.min(indxMin))
-    plot(list_err[[indexMin]]
+    plot(list_err[[1]]
          ,type = 'l'
-         ,col = col_vec[indexMin]
+         ,col = col_vec[1]
          ,main = main
          ,ylab = 'Error' 
          ,xlab = 'Umbral'
@@ -382,15 +382,12 @@
                                ctrl = h.control,
                                umbral = h.humbral,
                                var_y = 'Churn') 
-      
-      
-      result[[i]] <- c(mensaje = paste(paste('Error H', i, " - "), 
-                                       'umbral:', h.humbral, 
-                                       'test:', firstError$dfError$error[i], 
-                                       'cv:', h.cv_error),
+
+      result[[i]] <- c(umbral = h.humbral,
+                       ctrl = h.control,
+                       ranking = i,
                        errorTest = firstError$dfError$error[i],
-                       errorCV = h.cv_error
-      )
+                       errorCV = h.cv_error)
     }
     
     return(result) 
@@ -596,7 +593,7 @@
   {
     h.listPred <- list()
     for (i in seq(k)) {
-      h.listPred[[i]] <- knn(k = 1,
+      h.listPred[[i]] <- knn(k = i,
                                train = train,
                                test = test,
                                cl = y)
