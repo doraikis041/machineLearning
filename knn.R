@@ -7,32 +7,34 @@
   h.ntrain <- nTrain
   h.part <- partition_train_test_numeric(h.data, ntrain = h.ntrain)
   h.train <- h.part$train
+  h.trainY <- h.part$train
   h.test <- h.part$test
+  h.testY <- h.part$test
   
   # Particion para cross validation
   h.cv_part <- partition_cv(df = h.train)
   
   #Variables
-  h.k <- 2
-  h.vars <- names(h.train)
+  h.k <- 50
+  
   
   #Se elemina variable a predecir del data set de train y test
-  #h.train$Churn <- NULL
-  #h.test$Churn <- NULL
+  h.train$Churn <- NULL
+  h.test$Churn <- NULL
   
   # Formulas
-  h.formula <- 'as.factor(Churn) ~ .'
+  h.vars <- names(h.train)
   fn_err <- fn_err_cost #fn_err_cla
   
   #Predicción (k, train, test, y)
   h.knn_pred <- knn_pred(k = h.k,
                          train = h.train,
                          test = h.test,
-                         y = h.train$Churn)
+                         y = h.trainY$Churn)
   
   # Error de predicción en knn
   h.error_knn <- knn_pred_err(list_pred = h.knn_pred,
-                              newdata = h.test,
+                              newdata = h.testY,
                               y = 'Churn',
                               k= h.k)
   #Imprimo resueltdo
