@@ -1,5 +1,6 @@
   source("Utility/utils.R")
 
+  
   #Se carga los datos con las ETL generales
   h.data <- loadData()
   
@@ -22,12 +23,9 @@
   h.glm_fit <- glm_fit_formulas(train = h.train
                                 ,formulas = h.formulas)
 
-  # Predicciones utilizando 0.5 de umbral
-  h.glm_pred_err <- glm_pred_err(list_fit = h.glm_fit,
-                                     newdata = h.test,
-                                     y = "Churn")
-
-  # Matrix de confunsion
+ 
+  # Calculo de error en test y matriz de confunsion utilizando 
+  
   h.glm_pred_err_mc <- glm_pred_err_mc(list_fit = h.glm_fit,
                                        newdata = h.test,
                                        y = "Churn")

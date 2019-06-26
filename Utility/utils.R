@@ -530,25 +530,9 @@
   }
   
   
-  # Prediccion y error 
-  glm_pred_err <- function(list_fit, newdata, y, umbral =0.5) {
-    test_prob <- list()
-    test_pred <- list()
-    test_err <- rep(0, length(list_fit))
-    for (i in seq(1, length(list_fit))) {
-      # probabilidad
-      test_prob[[i]] <- predict(list_fit[[i]], newdata = newdata, type = 'response') #para que de la probabilidad
-      # prediccion
-      test_pred[[i]] <- ifelse(test_prob[[i]] > umbral,1,0)
-      # error de clasificacion
-      test_err[i] <- fn_err(test_pred[[i]], newdata[[y]])
-    }
-    list(prob = test_prob, pred = test_pred, err = test_err)
-  }
-  
   
   # Prediccion y matriz de confusión  
-  glm_pred_err_mc <- function(list_fit, newdata, y) {
+  glm_pred_err_mc <- function(list_fit, newdata, y, umbral=0.5) {
     test_prob <- list()
     test_pred <- list()
     test_err  <- list ()
@@ -557,7 +541,6 @@
       # probabilidad
       test_prob[[i]] <- predict(list_fit[[i]], newdata = newdata, type = 'response') #para que de la probabilidad
       # prediccion 
-      umbral <- seq(0.3, to = 0.7, by = 0.1)
       test_err[[i]] <- rep(0, length(umbral))
       test_pred[[i]] <- list ()
       test_mc[[i]] <- list ()
@@ -573,14 +556,14 @@
     list(prob = test_prob, pred = test_pred, err = test_err, mc = test_mc)
   }
   
-  # Prediccion y error MSE
+  # Prediccion y error CV
   cv_err <- function(cv_part, formulas, y) {
     cv_test <- cv_part$test
     cv_train <- cv_part$train
     cv_matrix_err <- matrix(0, nrow = cv_part$k_folds, ncol = length(formulas))
     for (k in seq(1, cv_part$k_folds)) {
       list_fit <- glm_fit_formulas(cv_train[[k]], formulas = formulas)
-      list_pred_err <- glm_pred_err_cla(list_fit, newdata = cv_test[[k]], y = y)
+      list_pred_err <- glm_pred_err(list_fit, newdata = cv_test[[k]], y = y)
       cv_matrix_err[k, ] <- list_pred_err$err  
     }
     apply(cv_matrix_err, 2, mean)
