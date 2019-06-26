@@ -21,51 +21,52 @@
   fn_err <- fn_err_cost #fn_err_cla
   
   #Definir el valor de mtry y ntree
-  h.rf_ctrl <- list(ctrl1 = list(ntree = 500, mtry = 6)
+  h.rf_ctrl <- list(
+                    ctrl1 = list(ntree = 500, mtry = 6)
                     ,ctrl2 = list(ntree = 500, mtry = 7)
-                    # ,ctrl3 = list(ntree = 500, mtry = 7)
-                    # ,ctrl4 = list(ntree = 500, mtry = 8)
-                    # ,ctrl5 = list(ntree = 525, mtry = 5)
-                    # ,ctrl6 = list(ntree = 525, mtry = 6)
-                    # ,ctrl7 = list(ntree = 525, mtry = 7)
-                    # ,ctrl8 = list(ntree = 525, mtry = 8)
-                    # ,ctrl9 = list(ntree = 550, mtry = 5)
-                    # ,ctrl10 = list(ntree = 550, mtry = 6)
-                    # ,ctrl11 = list(ntree = 550, mtry = 7)
-                    # ,ctrl12 = list(ntree = 550, mtry = 8)
-                    # ,ctrl13 = list(ntree = 575, mtry = 5)
-                    # ,ctrl14 = list(ntree = 575, mtry = 6)
-                    # ,ctrl15 = list(ntree = 575, mtry = 7)
-                    # ,ctrl16 = list(ntree = 575, mtry = 8)
-                    # ,ctrl17 = list(ntree = 600, mtry = 5)
-                    # ,ctrl18 = list(ntree = 600, mtry = 6)
-                    # ,ctrl19 = list(ntree = 600, mtry = 7)
-                    # ,ctrl20 = list(ntree = 600, mtry = 8)
-                    # ,ctrl21 = list(ntree = 625, mtry = 5)
-                    # ,ctrl22 = list(ntree = 625, mtry = 6)
-                    # ,ctrl23 = list(ntree = 625, mtry = 7)
-                    # ,ctrl24 = list(ntree = 625, mtry = 8)  
+                    ,ctrl3 = list(ntree = 500, mtry = 7)
+                    ,ctrl4 = list(ntree = 500, mtry = 8)
+                    ,ctrl5 = list(ntree = 525, mtry = 5)
+                    ,ctrl6 = list(ntree = 525, mtry = 6)
+                    ,ctrl7 = list(ntree = 525, mtry = 7)
+                    ,ctrl8 = list(ntree = 525, mtry = 8)
+                    ,ctrl9 = list(ntree = 550, mtry = 5)
+                    ,ctrl10 = list(ntree = 550, mtry = 6)
+                    ,ctrl11 = list(ntree = 550, mtry = 7)
+                    ,ctrl12 = list(ntree = 550, mtry = 8)
+                    ,ctrl13 = list(ntree = 575, mtry = 5)
+                    ,ctrl14 = list(ntree = 575, mtry = 6)
+                    ,ctrl15 = list(ntree = 575, mtry = 7)
+                    ,ctrl16 = list(ntree = 575, mtry = 8)
+                    ,ctrl17 = list(ntree = 600, mtry = 5)
+                    ,ctrl18 = list(ntree = 600, mtry = 6)
+                    ,ctrl19 = list(ntree = 600, mtry = 7)
+                    ,ctrl20 = list(ntree = 600, mtry = 8)
+                    ,ctrl21 = list(ntree = 625, mtry = 5)
+                    ,ctrl22 = list(ntree = 625, mtry = 6)
+                    ,ctrl23 = list(ntree = 625, mtry = 7)
+
                     
   )
   
 
-  # Entrenamiento de randomforest train, formula, ctrl
-  h.randomForest_fit <- rf_fit_ctrl(h.train,
-                                    h.formula,
-                                    h.rf_ctrl)
+  # Entrenamiento de randomforest (train, formula, ctrl)
+  h.randomForest_fit <- rf_fit_ctrl(train = h.train,
+                                    formula = h.formula,
+                                    ctrl = h.rf_ctrl)
   
 
-  #Probabilidad en test
-  h.randomForest_prob <- rf_prob(h.randomForest_fit,
-                                 h.test)
+  #Probabilidad en test (list_fit, newdata)
+  h.randomForest_prob <- rf_prob(list_fit = h.randomForest_fit,
+                                 newdata = h.test)
   
-  #Predicciones utilizando el umbral
-  h.randomForest_pred <- rf_pred(h.randomForest_prob,
-                                 h.umbral)
+  #Predicciones utilizando el umbral (test_prob, umbral)
+  h.randomForest_pred <- rf_pred(test_prob = h.randomForest_prob,
+                                 umbral = h.umbral)
   
-  #Error en test
-  h.randomForest_predErr <- rf_pred_err(h.randomForest_pred,
-                                        h.test$Churn)
+  #Error en test (test_pred, y)
+  h.randomForest_predErr <- rf_pred_err(test_pred = h.randomForest_pred,
+                                        y = h.test$Churn)
   
   #Plot del error en RamdomForest
   plot_umbral_err(h.randomForest_predErr,
@@ -80,7 +81,7 @@
                             iniErr = h.iniErr,
                             lastErr = h.lastErr)
 
-  #Ejecución de las CV con los mejores errores
+  #Ejecución de las CV con los mejores errores. Se identifica el minimo error por cada control
   h.rf_cv_automatic <- rfCVAutomatic(firstError = h.first,
                                        cv_part = h.cv_part, 
                                        formula = h.formula, 
@@ -91,58 +92,38 @@
   print(h.rf_cv_automatic)
   
   
-  # # Cross Validation
-  # # Control 3 con umbral 0.38
-  # h.rf_test_err_1 <- h.randomForest_predErr[[3]][4]
-  # h.rf_cv_ctrl_1 <- list(h1 = h.rf_ctrl[[3]])
-  # h.rf_cv_umbral_1 <- h.umbral[4]
-  # h.rf_cv_err_1 <- rf_cv_err(h.cv_part, 
-  #                            formula = h.formula, 
-  #                            ctrl = h.rf_cv_ctrl_1, 
-  #                            umbral = h.rf_cv_umbral_1,
-  #                            var_y = 'Churn') 
-  # print(paste('Error h1 -', 
-  #             'umbral:', h.rf_cv_umbral_1, 
-  #             'test:', h.rf_test_err_1, 
-  #             'cv:', h.rf_cv_err_1))
-  # 
-  # # Control 5 con umbral 0.38
-  # h.rf_test_err_2 <- h.randomForest_predErr[[5]][4]
-  # h.rf_cv_ctrl_2 <- list(h2 = h.rf_ctrl[[5]])
-  # h.rf_cv_umbral_2 <- h.umbral[4]
-  # h.rf_cv_err_2 <- rf_cv_err(h.cv_part, 
-  #                            formula = h.formula, 
-  #                            ctrl = h.rf_cv_ctrl_2, 
-  #                            umbral = h.rf_cv_umbral_2,
-  #                            var_y = 'Churn')
-  # print(paste('Error h2 -', 
-  #             'umbral:', h.rf_cv_umbral_2, 
-  #             'test:', h.rf_test_err_2, 
-  #             'cv:', h.rf_cv_err_2))
-  # 
-  # 
-  # print('Generacion de la prediccion sobre test sample')
-  # 
-  # 
-  # 
-  # 
+  # print('Generacion de la prediccion sobre test sample') 
   # h.test_sample <- read.csv('data/test_sample.csv')
+  # h.test_sample <- na.roughfix(h.test_sample)
   # h.CustomerID <- h.test_sample$CustomerID
   # h.test_sample$CustomerID <- NULL
   # h.test_sample$ServiceArea <- NULL
+  #
+  # h.hip_fit <- list(h.rf_fit[[4]])
+  # h.hip_umbral <- c(h.umbral[3])
+  # h.hip_ctrl <- list(h.rf_ctrl[[4]])
   # 
-  # h.hip_prob <- ... # calcular la probabilidad de la hipotesis seleccionada sobre test_sample
-  # h.hip_pred <- ... # calcular la prediccion para el umbral seleccionado
+  # 
+  # # calcular la probabilidad de la hipotesis seleccionada sobre test_sample
+  # h.hip_prob <- fr_prob(list_fit = h.hip_fit
+  #                          ,newdata = h.test_sample 
+  #                          ,ctrl = h.hip_ctrl)
+  # 
+  # # calcular la prediccion para el umbral seleccionado
+  # h.hip_pred <- fn_pred(test_prob = h.hip_prob
+  #                       ,umbral = h.hip_umbral)
+  # 
   # h.Churn <- as.logical(h.hip_pred[[1]][[1]]) # convertir 1->TRUE / 0->FALSE
   # 
   # print('Generar salida')
   # 
-  # h.output <- data.frame(CustomerID = h.CustomerID, 
+  # h.output <- data.frame(CustomerID = h.CustomerID,
   #                        Churn = h.Churn)
-  # write.csv(h.output, 
-  #           file = "test_sample_pred.csv", 
+  # write.csv(h.output,
+  #           file = "test_sample_pred_RF.csv",
   #           row.names = FALSE)
   # 
   # print('Done')
   # 
+  
  
