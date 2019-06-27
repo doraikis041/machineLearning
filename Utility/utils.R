@@ -628,4 +628,43 @@
     return(cv_list_erro)
   }
   
+  ###########################################################
+  ######## Naive Bayes para una lista de formulas  ##########
+  ###########################################################
+  naiveBayes_fit_formulas <- function(train, formulas) {
+    list_fit <- list()
+    for (i in seq(1, length(formulas))) {
+      list_fit[[i]] <- naiveBayes(as.formula(formulas[i]), data = train)
+    }
+    return(list_fit)
+  }
+  
+  # Prediccion & error Naive Bayes
+  nbayes_pred_err <- function(list_fit, newdata, y) {
+    test_pred <- list()
+    test_err <- rep(0, length(list_fit))
+    for (i in seq(1, length(list_fit))) {
+      # prediccion
+      test_pred[[i]] <- predict(list_fit[[i]], newdata = newdata)
+      # Error clasificacion
+      test_err[i] <- fn_err(test_pred[[i]], newdata[[y]])
+    }
+    list(pred = test_pred, err = test_err)
+    
+  }
+  
+  
+  # Prediccion y error Naive Bayes CV
+  cv_err_nBayes <- function(cv_part, formulas, y) {
+    cv_test <- cv_part$test
+    cv_train <- cv_part$train
+    cv_matrix_err <- matrix(0, nrow = cv_part$k_folds, ncol = length(formulas))
+    for (k in seq(1, cv_part$k_folds)) {
+      list_fit <- naiveBayes_fit_formulas(cv_train[[k]], formulas = formulas)
+      list_pred_err <- nbayes_pred_err(list_fit, newdata = cv_test[[k]], y = y)
+      cv_matrix_err[k, ] <- list_pred_err$err  
+    }
+    apply(cv_matrix_err, 2, mean)
+  }
+  
   
