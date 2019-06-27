@@ -4,6 +4,9 @@
   #Se carga los datos con las ETL generales
   h.data <- loadData()
   
+  #umbral
+  h.umbral <- 0.3
+  
   #Generar la particion de test & train
   h.ntrain <- nTrain
   h.part <- partition_train_test_numeric(h.data, ntrain = h.ntrain)
@@ -16,7 +19,7 @@
   
   # Formulas
   h.formulas <- c("as.factor(Churn) ~ .")
-  fn_err <- fn_err_cost #fn_err_cla
+  fn_err <-  fn_err_cost #fn_err_cla
 
 
   # Entrenamiento de GLM
@@ -25,10 +28,10 @@
 
  
   # Calculo de error en test y matriz de confunsion utilizando 
-  
-  h.glm_pred_err_mc <- glm_pred_err_mc(list_fit = h.glm_fit,
+    h.glm_pred_err_mc <- glm_pred_err_mc(list_fit = h.glm_fit,
                                        newdata = h.test,
-                                       y = "Churn")
+                                       y = "Churn",
+                                       umbral = h.umbral)
   
   #print de los resultados
   print(h.glm_pred_err_mc$err)
@@ -38,7 +41,8 @@
   # Cross Validation
   h.cv_err <- cv_err(cv_part = h.cv_part
                      ,formulas = h.formulas
-                     ,y = "Churn")
+                     ,y = "Churn"
+                     ,umbral = h.umbral)
 
   
   # Print del valor medio del error generado en CV
