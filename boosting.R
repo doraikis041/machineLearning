@@ -20,16 +20,16 @@
   h.formula <- 'Churn ~ .'
   fn_err <- fn_err_cost #fn_err_cla
   
-  h.gbm_ctrl <- list(ctrl1 = list(ntree = 350, depth = 2, shrinkage = 0.05)
-                     ,ctrl2 = list(ntree = 400, depth = 2, shrinkage = 0.05)
-                     ,ctrl3 = list(ntree = 450, depth = 2, shrinkage = 0.05)
-                     ,ctrl4 = list(ntree = 500, depth = 2, shrinkage = 0.05)
-                     ,ctrl5 = list(ntree = 550, depth = 2, shrinkage = 0.05)
-                     ,ctrl6 = list(ntree = 350, depth = 3, shrinkage = 0.05)
-                     ,ctrl7 = list(ntree = 400, depth = 3, shrinkage = 0.05)
-                     ,ctrl8 = list(ntree = 450, depth = 3, shrinkage = 0.05)
-                     ,ctrl9 = list(ntree = 500, depth = 3, shrinkage = 0.05)
-                     ,ctrl10 = list(ntree = 550, depth = 3, shrinkage = 0.05)
+  h.gbm_ctrl <- list(ctrl1 = list(ntree = 350, depth = 4, shrinkage = 0.05)
+                     ,ctrl2 = list(ntree = 400, depth = 4, shrinkage = 0.05)
+                     ,ctrl3 = list(ntree = 450, depth = 4, shrinkage = 0.05)
+                     ,ctrl4 = list(ntree = 500, depth = 4, shrinkage = 0.05)
+                     ,ctrl5 = list(ntree = 550, depth = 4, shrinkage = 0.05)
+                     ,ctrl6 = list(ntree = 350, depth = 5, shrinkage = 0.05)
+                     ,ctrl7 = list(ntree = 400, depth = 5, shrinkage = 0.05)
+                     ,ctrl8 = list(ntree = 450, depth = 5, shrinkage = 0.0)
+                     ,ctrl9 = list(ntree = 500, depth = 5, shrinkage = 0.05)
+                     ,ctrl10 = list(ntree = 550, depth = 5, shrinkage = 0.05)
                      )
   
   # Entrenamiento de boosting train, formula, ctrl
